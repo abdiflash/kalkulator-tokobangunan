@@ -236,7 +236,7 @@
                     <span class="text-xs text-slate-400">Estimasi Total Dinding: <strong id="resDinTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
                 <div id="resDinList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
-                <button onclick="addDindingToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                <button onclick="addDindingToCart(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
                     <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Dinding ke Penawaran
                 </button>
             </div>
@@ -286,7 +286,7 @@
                     <span class="text-xs text-slate-400">Estimasi Total Lantai: <strong id="resKerTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
                 <div id="resKerList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
-                <button onclick="addKeramikToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                <button onclick="addKeramikToCart(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
                     <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Lantai ke Penawaran
                 </button>
             </div>
@@ -346,7 +346,7 @@
                     <span class="text-xs text-slate-400">Estimasi Total Atap: <strong id="resAtpTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
                 <div id="resAtpList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
-                <button onclick="addAtapToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                <button onclick="addAtapToCart(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
                     <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Atap ke Penawaran
                 </button>
             </div>
@@ -385,7 +385,7 @@
                     <span class="text-xs text-slate-400">Estimasi Total Cor: <strong id="resBtnTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
                 <div id="resBtnList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
-                <button onclick="addBetonToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                <button onclick="addBetonToCart(this)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
                     <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Cor Beton ke Penawaran
                 </button>
             </div>
@@ -394,8 +394,8 @@
     </main>
 
     <!-- MODAL POPUP: PENAWARAN & STRUK INVOICE -->
-    <div id="modalCart" onclick="handleModalBackdropClick(event, 'modalCart')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-        <div onclick="event.stopPropagation()" class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div id="modalCart" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
             <div class="bg-slate-900 text-white p-4 flex justify-between items-center no-print">
                 <h3 class="font-bold text-base flex items-center gap-2">
                     <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Struk & Proforma Invoice Penawaran
@@ -424,11 +424,12 @@
                     </div>
                 </div>
 
-                <!-- TABLE DAFTAR BELANJA -->
+                <!-- TABLE DAFTAR BELANJA (KOLOM NOMOR/NO. DITAMBAHKAN) -->
                 <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                             <tr>
+                                <th class="p-2.5 text-center w-12">No.</th>
                                 <th class="p-2.5">Item Material</th>
                                 <th class="p-2.5 text-center w-28">Jumlah</th>
                                 <th class="p-2.5 text-right w-28">Harga Satuan</th>
@@ -558,8 +559,8 @@
     </div>
 
     <!-- MODAL POPUP: MASTER HARGA DINAMIS & PENGATURAN TOKO -->
-    <div id="modalSettings" onclick="handleModalBackdropClick(event, 'modalSettings')" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-        <div onclick="event.stopPropagation()" class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div id="modalSettings" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
             <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
                 <h3 class="font-bold text-base flex items-center gap-2">
                     <i class="fa-solid fa-sliders text-amber-400"></i> Pengaturan Toko & Master Harga
@@ -751,14 +752,6 @@
             calcAtap();
             calcBeton();
             renderHistory();
-
-            // Event handler keyboard ESC untuk menutup modal
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeModal('modalCart');
-                    closeModal('modalSettings');
-                }
-            });
         });
 
         function initStoreProfile() {
@@ -1010,19 +1003,41 @@
             renderCart();
         }
 
+        // TAMBAH ITEM DENGAN PEMBAHARUAN JIKA NAMA MATERIAL SAMA
         function addItemToActiveDraft(itemsArray) {
             const draft = getActiveDraft();
             if (!draft.cart) draft.cart = [];
             
-            // Deep copy items
             const newItems = itemsArray.map(item => ({ ...item, rawQty: parseFloat(item.qty) || 1 }));
-            draft.cart.push(...newItems);
+            
+            newItems.forEach(newItem => {
+                const existingIndex = draft.cart.findIndex(i => i.name === newItem.name);
+                if (existingIndex !== -1) {
+                    draft.cart[existingIndex] = newItem; // Perbarui data item jika sudah ada di penawaran
+                } else {
+                    draft.cart.push(newItem);
+                }
+            });
+
             draft.updatedAt = new Date().toISOString();
 
             saveDrafts();
             renderDraftSelector();
             syncActiveDraftToUI();
             showToast(`Item ditambahkan ke draf ${draft.custName || 'Pelanggan'}!`);
+        }
+
+        function handleAddBtnFeedback(btnEl) {
+            if (!btnEl) return;
+            const originalHtml = btnEl.innerHTML;
+            btnEl.disabled = true;
+            btnEl.classList.add('opacity-75', 'cursor-not-allowed');
+            btnEl.innerHTML = `<i class="fa-solid fa-check"></i> Sudah Ditambahkan`;
+            setTimeout(() => {
+                btnEl.disabled = false;
+                btnEl.classList.remove('opacity-75', 'cursor-not-allowed');
+                btnEl.innerHTML = originalHtml;
+            }, 1500);
         }
 
         function getMaterialPrice(id) {
@@ -1100,11 +1115,6 @@
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function handleModalBackdropClick(event, id) {
-            if (event.target === document.getElementById(id)) {
-                closeModal(id);
-            }
-        }
 
         function openMasterHargaModal() {
             renderMasterHargaTable();
@@ -1157,7 +1167,6 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Compress to JPG Base64 (0.8 Quality)
                     tempQrisData = canvas.toDataURL('image/jpeg', 0.8);
                     renderQrisPreview(tempQrisData);
                 };
@@ -1266,7 +1275,7 @@
             showToast("Pengaturan toko & pembayaran berhasil disimpan!");
         }
 
-        // --- RUMUS & KALKULASI REVISI ---
+        // --- RUMUS & KALKULASI ---
         let currentDinItems = [];
         function calcDinding() {
             const p = Math.max(0, parseFloat(document.getElementById('dinPanjang').value) || 0);
@@ -1281,7 +1290,7 @@
             let luasKotor = keliling * t;
             let deduksi = (pintu * 2) + (jendela * 1.5);
             let luasBersih = Math.max(0, luasKotor - deduksi);
-            let luasEfektif = luasBersih * 1.05; // Cadangan 5%
+            let luasEfektif = luasBersih * 1.05;
 
             currentDinItems = [];
             let totalBiaya = 0;
@@ -1503,25 +1512,29 @@
             document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
         }
 
-        // TAMBAH ITEM KE DRAF AKTIF
-        function addDindingToCart() {
+        // TAMBAH ITEM KE DRAF AKTIF (DENGAN MP PROTEKSI MULTI-KLIK)
+        function addDindingToCart(btnEl) {
             if (currentDinItems.length === 0) return alert("Isi dimensi dinding terlebih dahulu!");
             addItemToActiveDraft(currentDinItems);
+            if (btnEl) handleAddBtnFeedback(btnEl);
         }
-        function addKeramikToCart() {
+        function addKeramikToCart(btnEl) {
             if (currentKerItems.length === 0) return alert("Isi dimensi keramik terlebih dahulu!");
             addItemToActiveDraft(currentKerItems);
+            if (btnEl) handleAddBtnFeedback(btnEl);
         }
-        function addAtapToCart() {
+        function addAtapToCart(btnEl) {
             if (currentAtpItems.length === 0) return alert("Isi dimensi atap terlebih dahulu!");
             addItemToActiveDraft(currentAtpItems);
+            if (btnEl) handleAddBtnFeedback(btnEl);
         }
-        function addBetonToCart() {
+        function addBetonToCart(btnEl) {
             if (currentBtnItems.length === 0) return alert("Isi dimensi cor beton terlebih dahulu!");
             addItemToActiveDraft(currentBtnItems);
+            if (btnEl) handleAddBtnFeedback(btnEl);
         }
 
-        // TAMBAH ITEM MANUAL LANGSUNG DARI MODAL PENAWARAN (REVISI BUG HARGA TOTAL)
+        // TAMBAH ITEM MANUAL LANGSUNG DARI MODAL PENAWARAN
         function addCustomItemToCart() {
             const nameEl = document.getElementById('customItemName');
             const qtyEl = document.getElementById('customItemQty');
@@ -1529,21 +1542,18 @@
 
             const name = nameEl.value.trim();
             const qty = qtyEl.value.trim();
-            const price = Math.max(0, parseFloat(priceEl.value) || 0);
+            const price = parseFloat(priceEl.value) || 0;
 
             if (!name || !qty) {
                 alert("Isi nama item dan kuantitas!");
                 return;
             }
 
-            const numQty = parseFloat(qty) || 1;
-            const total = Math.round(price * numQty);
-
             const item = [{
                 name: name,
                 qty: qty,
                 price: price,
-                total: total
+                total: price
             }];
 
             addItemToActiveDraft(item);
@@ -1553,13 +1563,10 @@
             priceEl.value = '';
         }
 
-        // REVISI BUG TOTAL BARIS KALAU KUANTITAS DIUBAH
         function updateCartItemQty(idx, newQtyStr) {
             const draft = getActiveDraft();
             if (draft.cart && draft.cart[idx]) {
                 draft.cart[idx].qty = newQtyStr;
-                const numQty = parseFloat(newQtyStr) || 1;
-                draft.cart[idx].total = Math.round((draft.cart[idx].price || 0) * numQty);
                 saveDrafts();
                 renderCart();
             }
@@ -1612,12 +1619,13 @@
             let subtotal = 0;
 
             if (cartItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator atau form di bawah.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator atau form di bawah.</td></tr>`;
             } else {
                 cartItems.forEach((item, idx) => {
                     subtotal += item.total;
                     tbody.innerHTML += `
                         <tr>
+                            <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
                             <td class="p-2.5 font-semibold text-slate-800">${item.name}</td>
                             <td class="p-2.5 text-center font-bold">
                                 <input type="text" value="${item.qty}" onchange="updateCartItemQty(${idx}, this.value)" class="w-full text-center bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs font-bold text-slate-800 focus:bg-white focus:outline-none">
@@ -1644,25 +1652,36 @@
             document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
         }
 
-        // RIWAYAT PENAWARAN FINAL
+        // RIWAYAT PENAWARAN FINAL (TUMPUK DATA JIKA NAMA PELANGGAN SAMA)
         function saveHistory() {
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) return alert("Daftar belanjaan draf ini masih kosong!");
 
+            const name = (draft.custName || "Pelanggan Umum").trim();
+            const existingIndex = historyQuotes.findIndex(h => h.custName.trim().toLowerCase() === name.toLowerCase());
+
             const record = {
-                id: Date.now(),
+                id: existingIndex !== -1 ? historyQuotes[existingIndex].id : Date.now(),
                 date: new Date().toLocaleDateString('id-ID'),
-                custName: draft.custName || "Pelanggan Umum",
+                custName: name,
                 custPhone: draft.custPhone || '',
-                items: [...draft.cart],
+                items: JSON.parse(JSON.stringify(draft.cart)),
                 discount: draft.discount || 0,
                 dp: draft.dp || 0
             };
 
-            historyQuotes.unshift(record);
+            if (existingIndex !== -1) {
+                // Tumpuk/Timpa riwayat lama dengan data terbaru
+                historyQuotes.splice(existingIndex, 1);
+                historyQuotes.unshift(record);
+                showToast(`Riwayat untuk "${name}" diperbarui!`);
+            } else {
+                historyQuotes.unshift(record);
+                showToast("Penawaran berhasil diarsip ke Riwayat!");
+            }
+
             localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
             renderHistory();
-            showToast("Penawaran berhasil diarsip ke Riwayat!");
         }
 
         function renderHistory() {
