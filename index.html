@@ -24,6 +24,8 @@
             .print-only { display: block !important; }
             body { background: white !important; color: black !important; font-size: 11pt; }
 
+            #modalCart.hidden { display: none !important; }
+
             #modalCart {
                 position: static !important;
                 display: block !important;
@@ -49,7 +51,7 @@
 
             table { width: 100% !important; border-collapse: collapse !important; }
             th, td { border: 1px solid #cbd5e1 !important; padding: 6px 8px !important; }
-            th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+            th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
             #paymentBoxModal,
             #dispQrisContainer,
@@ -119,8 +121,11 @@
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button onclick="createNewDraft()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> Draf Baru
+                    <button onclick="createNewDraft()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5" title="Draf Baru">
+                        <i class="fa-solid fa-plus"></i> Baru
+                    </button>
+                    <button onclick="duplicateActiveDraft()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-2.5 py-2 rounded-lg shadow transition flex items-center gap-1.5" title="Duplikat Draf Ini">
+                        <i class="fa-solid fa-copy"></i> Salin
                     </button>
                     <button onclick="deleteActiveDraft()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-2.5 py-2 rounded-lg border border-red-200 transition" title="Hapus Draf Ini">
                         <i class="fa-solid fa-trash-can"></i>
@@ -410,6 +415,7 @@
                     <h2 id="printStoreName" class="text-xl font-extrabold uppercase">TB. MAJU JAYA MAKMUR</h2>
                     <p id="printStoreDesc" class="text-xs text-slate-600">Jl. Raya Bangunan No. 88 &bull; WA: 0812-3456-7890</p>
                     <p class="text-sm font-bold uppercase mt-2 text-slate-800 tracking-wider">PROFORMA INVOICE PENAWARAN MATERIAL</p>
+                    <p id="printInvoiceNumber" class="text-xs font-semibold text-slate-500 mt-0.5">No: INV/TB/20261003/001</p>
                 </div>
 
                 <!-- INFO PELANGGAN FORM -->
@@ -633,6 +639,23 @@
                             </div>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-1">*Gambar QRIS disimpan secara lokal dan otomatis tampil di Struk Invoice & Cetak PDF.</p>
+                    </div>
+                </div>
+
+                <!-- EKSPOR & IMPOR BACKUP DATA -->
+                <div class="bg-slate-100 p-3 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <strong class="text-slate-800 text-xs block">Cadangkan Data & Master Harga</strong>
+                        <span class="text-[10px] text-slate-500">Ekspor/Impor seluruh data master harga dan draf ke file JSON.</span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="exportDataJSON()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-download"></i> Ekspor JSON
+                        </button>
+                        <button onclick="document.getElementById('importJsonFile').click()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-upload"></i> Impor JSON
+                        </button>
+                        <input type="file" id="importJsonFile" accept=".json" class="hidden" onchange="importDataJSON(event)">
                     </div>
                 </div>
 
@@ -882,6 +905,26 @@
             return newDraft;
         }
 
+        function duplicateActiveDraft() {
+            const current = getActiveDraft();
+            const newId = 'draft_' + Date.now();
+            const dupDraft = {
+                id: newId,
+                custName: `${current.custName || 'Pelanggan'} (Salinan)`,
+                custPhone: current.custPhone || '',
+                cart: JSON.parse(JSON.stringify(current.cart || [])),
+                discount: current.discount || 0,
+                dp: current.dp || 0,
+                updatedAt: new Date().toISOString()
+            };
+            drafts.unshift(dupDraft);
+            activeDraftId = newId;
+            saveDrafts();
+            renderDraftSelector();
+            syncActiveDraftToUI();
+            showToast(`Draf disalin sebagai "${dupDraft.custName}"!`);
+        }
+
         function switchActiveDraft(id) {
             activeDraftId = id;
             renderDraftSelector();
@@ -957,6 +1000,14 @@
             if (cartDisc) cartDisc.value = draft.discount || 0;
             if (cartDP) cartDP.value = draft.dp || 0;
 
+            // Generate invoice number for print header
+            const printInvNo = document.getElementById('printInvoiceNumber');
+            if (printInvNo) {
+                const todayStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
+                const suffix = draft.id.slice(-4).toUpperCase();
+                printInvNo.innerText = `No: INV/TB/${todayStr}/${suffix}`;
+            }
+
             renderCart();
         }
 
@@ -1006,7 +1057,6 @@
             const draft = getActiveDraft();
             if (!draft.cart) draft.cart = [];
             
-            // Deep copy items
             const newItems = itemsArray.map(item => ({ ...item, rawQty: parseFloat(item.qty) || 1 }));
             draft.cart.push(...newItems);
             draft.updatedAt = new Date().toISOString();
@@ -1144,7 +1194,6 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Compress to JPG Base64 (0.8 Quality)
                     tempQrisData = canvas.toDataURL('image/jpeg', 0.8);
                     renderQrisPreview(tempQrisData);
                 };
@@ -1175,6 +1224,65 @@
             tempQrisData = '';
             document.getElementById('cfgQrisFile').value = '';
             renderQrisPreview('');
+        }
+
+        // FITUR EKSPOR & IMPOR DATA JSON BACKUP
+        function exportDataJSON() {
+            const exportData = {
+                version: "2.0",
+                storeProfile: storeProfile,
+                masterPrices: masterPrices,
+                drafts: drafts,
+                historyQuotes: historyQuotes
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `Backup_TokoBangunan_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Backup data JSON berhasil diunduh!");
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.masterPrices && Array.isArray(data.masterPrices)) {
+                        masterPrices = data.masterPrices;
+                        localStorage.setItem('tb_master_prices_v2', JSON.stringify(masterPrices));
+                    }
+                    if (data.storeProfile) {
+                        storeProfile = { ...storeProfile, ...data.storeProfile };
+                        localStorage.setItem('tb_store_profile', JSON.stringify(storeProfile));
+                    }
+                    if (data.drafts && Array.isArray(data.drafts)) {
+                        drafts = data.drafts;
+                        activeDraftId = drafts[0]?.id || null;
+                        saveDrafts();
+                    }
+                    if (data.historyQuotes && Array.isArray(data.historyQuotes)) {
+                        historyQuotes = data.historyQuotes;
+                        localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+                    }
+
+                    loadStoreProfile();
+                    renderDraftSelector();
+                    syncActiveDraftToUI();
+                    renderMasterHargaTable();
+                    renderHistory();
+                    showToast("Data berhasil dipulihkan dari file JSON!");
+                } catch(err) {
+                    alert("File JSON tidak valid atau rusak!");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function renderMasterHargaTable() {
@@ -1268,7 +1376,7 @@
             let luasKotor = keliling * t;
             let deduksi = (pintu * 2) + (jendela * 1.5);
             let luasBersih = Math.max(0, luasKotor - deduksi);
-            let luasEfektif = luasBersih * 1.05; // Cadangan 5%
+            let luasEfektif = luasBersih * 1.05;
 
             currentDinItems = [];
             let totalBiaya = 0;
@@ -1490,7 +1598,7 @@
             document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
         }
 
-        // TAMBAH ITEM KE DRAF AK TIF
+        // TAMBAH ITEM KE DRAF AKTIF
         function addDindingToCart() {
             if (currentDinItems.length === 0) return alert("Isi dimensi dinding terlebih dahulu!");
             addItemToActiveDraft(currentDinItems);
@@ -1523,11 +1631,14 @@
                 return;
             }
 
+            const match = qty.match(/[\d\.]+/);
+            const numQty = match ? parseFloat(match[0]) : 1;
+
             const item = [{
                 name: name,
                 qty: qty,
                 price: price,
-                total: price
+                total: Math.round(price * numQty)
             }];
 
             addItemToActiveDraft(item);
@@ -1537,10 +1648,16 @@
             priceEl.value = '';
         }
 
+        // PERBAIKAN PERHITUNGAN ULANG QUANTITY DAN HARGA DI TABEL PENAWARAN
         function updateCartItemQty(idx, newQtyStr) {
             const draft = getActiveDraft();
             if (draft.cart && draft.cart[idx]) {
                 draft.cart[idx].qty = newQtyStr;
+                
+                const match = String(newQtyStr).match(/[\d\.]+/);
+                const numQty = match ? parseFloat(match[0]) : 1;
+                draft.cart[idx].total = Math.round((draft.cart[idx].price || 0) * numQty);
+
                 saveDrafts();
                 renderCart();
             }
@@ -1552,8 +1669,8 @@
                 const price = Math.max(0, parseFloat(newPriceVal) || 0);
                 draft.cart[idx].price = price;
                 
-                // Recalculate item total if numeric qty extracted
-                const numQty = parseFloat(draft.cart[idx].qty) || 1;
+                const match = String(draft.cart[idx].qty).match(/[\d\.]+/);
+                const numQty = match ? parseFloat(match[0]) : 1;
                 draft.cart[idx].total = Math.round(price * numQty);
 
                 saveDrafts();
