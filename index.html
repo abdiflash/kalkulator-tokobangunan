@@ -1,1903 +1,1157 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalkulator Material Toko Bangunan Pro</title>
-
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#0b132b',
-                            950: '#060c1d',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- FontAwesome 6 Icons CDN -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-        }
-
-        /* Custom scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Print CSS for Proforma Invoice */
+        body { font-family: 'Inter', sans-serif; }
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printArea, #printArea * {
-                visibility: visible;
-            }
-            #printArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                padding: 20px;
-                background: white;
-                color: black;
-            }
-            .no-print {
-                display: none !important;
-            }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-12">
 
-    <!-- HEADER BAR TOKO BANGUNAN -->
-    <header class="bg-brand-900 text-white sticky top-0 z-30 shadow-lg border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
+    <!-- HEADER TOKO WHITE-LABEL -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white text-xl shadow">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <h1 id="headerStoreName" class="font-bold text-lg leading-tight flex items-center gap-2">
+                        TB. MAJU JAYA MAKMUR <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded">PRO</span>
+                    </h1>
+                    <p id="headerStoreDesc" class="text-xs text-emerald-200">
+                        <i class="fa-solid fa-location-dot text-amber-300"></i> Jl. Raya Bangunan No. 88 &bull; <i class="fa-brands fa-whatsapp text-emerald-300"></i> 0812-3456-7890
+                    </p>
+                </div>
+            </div>
             
-            <!-- Store Profile Badge -->
-            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-emerald-500 text-slate-900 p-2.5 rounded-xl flex items-center justify-center shadow-inner">
-                        <i class="fa-solid fa-store text-xl"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h1 id="headerStoreName" class="font-extrabold text-base sm:text-lg tracking-wide uppercase text-white">TB. MAJU JAYA MAKMUR</h1>
-                            <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">PRO</span>
-                        </div>
-                        <p id="headerStoreAddress" class="text-xs text-slate-300 font-medium flex items-center gap-1.5 mt-0.5">
-                            <i class="fa-solid fa-location-dot text-amber-400"></i>
-                            <span>Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890</span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Mobile Header Right Actions -->
-                <div class="flex items-center space-x-2 sm:hidden">
-                    <button onclick="openMasterHargaModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 p-2 rounded-lg border border-slate-700 text-sm" title="Master Harga">
-                        <i class="fa-solid fa-sliders"></i>
-                    </button>
-                    <button onclick="openCartModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold p-2 rounded-lg text-sm relative" title="Penawaran">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <span id="mobileCartCount" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900">0</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Header Action Buttons (Desktop) -->
-            <div class="hidden sm:flex items-center space-x-3">
-                <button onclick="openMasterHargaModal()" 
-                    class="bg-slate-800/90 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 px-3.5 py-2 rounded-lg text-xs font-bold border border-emerald-500/30 transition flex items-center space-x-2 shadow-sm">
-                    <i class="fa-solid fa-sliders text-amber-400"></i>
-                    <span>Master Harga</span>
+            <div class="flex items-center space-x-2">
+                <button onclick="openMasterHargaModal()" class="bg-emerald-800 hover:bg-emerald-700 text-xs text-emerald-100 font-semibold px-3 py-2 rounded-lg border border-emerald-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-amber-300"></i> Master Harga
                 </button>
-
-                <button onclick="openCartModal()" 
-                    class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition flex items-center space-x-2 shadow-md relative">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span>Penawaran</span>
-                    <span id="desktopCartCount" class="bg-slate-950 text-amber-400 text-[11px] font-black px-2 py-0.5 rounded-full border border-amber-400/40">0</span>
+                <button onclick="openModal('modalCart')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg shadow transition flex items-center gap-2 relative">
+                    <i class="fa-solid fa-cart-shopping text-sm"></i> Penawaran
+                    <span id="cartBadge" class="bg-red-600 text-white text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
                 </button>
             </div>
-
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6 flex-grow">
+    <!-- CONTAINER UTAMA -->
+    <main class="max-w-6xl mx-auto px-3 sm:px-4 mt-4 no-print">
 
-        <!-- GRID NAVIGATION BAR (4 Modules) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-            <button onclick="switchTab('dinding')" id="nav-dinding" 
-                class="tab-btn active bg-emerald-600 text-white font-bold p-3 sm:p-3.5 rounded-xl shadow-sm border border-emerald-600 flex items-center justify-center space-x-2 text-xs sm:text-sm transition">
-                <i class="fa-solid fa-cubes text-base"></i>
-                <span>1. Dinding & Hebel</span>
+        <!-- NAVIGASI GRID 4 TOMBOL (NO SLIDER) -->
+        <nav class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            <button onclick="switchTab('tabDinding')" id="btnTabDinding" class="tab-btn bg-white text-emerald-800 font-bold py-2.5 px-2 rounded-xl shadow-sm border-2 border-emerald-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-cubes text-emerald-600"></i> 1. Dinding & Hebel
             </button>
-            <button onclick="switchTab('keramik')" id="nav-keramik" 
-                class="tab-btn bg-white hover:bg-slate-100 text-slate-700 font-bold p-3 sm:p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center space-x-2 text-xs sm:text-sm transition">
-                <i class="fa-solid fa-border-all text-base text-emerald-600"></i>
-                <span>2. Keramik / Granit</span>
+            <button onclick="switchTab('tabKeramik')" id="btnTabKeramik" class="tab-btn bg-slate-200 text-slate-700 font-semibold py-2.5 px-2 rounded-xl border border-slate-300 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-border-all text-slate-500"></i> 2. Keramik / Granit
             </button>
-            <button onclick="switchTab('atap')" id="nav-atap" 
-                class="tab-btn bg-white hover:bg-slate-100 text-slate-700 font-bold p-3 sm:p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center space-x-2 text-xs sm:text-sm transition">
-                <i class="fa-solid fa-house-chimney text-base text-emerald-600"></i>
-                <span>3. Atap & Rangka</span>
+            <button onclick="switchTab('tabAtap')" id="btnTabAtap" class="tab-btn bg-slate-200 text-slate-700 font-semibold py-2.5 px-2 rounded-xl border border-slate-300 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-house-chimney text-slate-500"></i> 3. Atap & Rangka
             </button>
-            <button onclick="switchTab('cor')" id="nav-cor" 
-                class="tab-btn bg-white hover:bg-slate-100 text-slate-700 font-bold p-3 sm:p-3.5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-center space-x-2 text-xs sm:text-sm transition">
-                <i class="fa-solid fa-layer-group text-base text-emerald-600"></i>
-                <span>4. Cor Beton Dak</span>
+            <button onclick="switchTab('tabBeton')" id="btnTabBeton" class="tab-btn bg-slate-200 text-slate-700 font-semibold py-2.5 px-2 rounded-xl border border-slate-300 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-layer-group text-slate-500"></i> 4. Cor Beton Dak
             </button>
-        </div>
+        </nav>
 
-        <!-- SMART PRESET BAR (Synchronized Dinding & Keramik) -->
-        <div class="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-            <div class="flex items-center space-x-2 text-amber-900 font-bold text-xs sm:text-sm">
-                <i class="fa-solid fa-bolt text-amber-500 text-base"></i>
+        <!-- PANEL PRESET SINKRONISASI CEPA T -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+            <div class="flex items-center gap-2 text-xs font-semibold text-amber-900">
+                <i class="fa-solid fa-bolt text-amber-500 text-sm"></i>
                 <span>Preset Cepat Ukuran (Otomatis Sinkron Dinding & Keramik):</span>
             </div>
-            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                <button onclick="applyPreset(3, 3, 3, 'Kamar 3 × 3m')" 
-                    class="bg-white hover:bg-amber-100 text-slate-800 border border-amber-300 font-semibold px-3 py-1.5 rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5">
-                    <i class="fa-solid fa-bed text-amber-600"></i>
-                    <span>Kamar 3 × 3m</span>
+            <div class="flex flex-wrap gap-1.5">
+                <button onclick="applyPreset(3, 3, 3)" class="bg-white hover:bg-amber-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 shadow-sm transition">
+                    <i class="fa-solid fa-bed text-amber-600 mr-1"></i> Kamar 3 × 3m
                 </button>
-                <button onclick="applyPreset(3, 4, 3, 'Kamar 3 × 4m')" 
-                    class="bg-white hover:bg-amber-100 text-slate-800 border border-amber-300 font-semibold px-3 py-1.5 rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5">
-                    <i class="fa-solid fa-bed text-amber-600"></i>
-                    <span>Kamar 3 × 4m</span>
+                <button onclick="applyPreset(3, 4, 3)" class="bg-white hover:bg-amber-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 shadow-sm transition">
+                    <i class="fa-solid fa-bed text-amber-600 mr-1"></i> Kamar 3 × 4m
                 </button>
-                <button onclick="applyPreset(4, 6, 3.5, 'Rumah 4 × 6m')" 
-                    class="bg-white hover:bg-amber-100 text-slate-800 border border-amber-300 font-semibold px-3 py-1.5 rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5">
-                    <i class="fa-solid fa-house text-amber-600"></i>
-                    <span>Rumah 4 × 6m</span>
+                <button onclick="applyPreset(4, 6, 3.5)" class="bg-white hover:bg-amber-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 shadow-sm transition">
+                    <i class="fa-solid fa-house text-amber-600 mr-1"></i> Rumah 4 × 6m
                 </button>
-                <button onclick="applyPreset(10, 0, 2, 'Pagar 10 × 2m', true)" 
-                    class="bg-white hover:bg-amber-100 text-slate-800 border border-amber-300 font-semibold px-3 py-1.5 rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5">
-                    <i class="fa-solid fa-bars-staggered text-amber-600"></i>
-                    <span>Pagar 10 × 2m</span>
+                <button onclick="applyPresetPagar(10, 2)" class="bg-white hover:bg-amber-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 shadow-sm transition">
+                    <i class="fa-solid fa-align-justify text-amber-600 mr-1"></i> Pagar 10 × 2m
                 </button>
             </div>
         </div>
 
-        <!-- MODULE 1: DINDING & HEBEL -->
-        <section id="module-dinding" class="tab-content bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-xl font-bold">
-                        <i class="fa-solid fa-cubes text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-slate-900 text-lg">Kalkulator Bata Ringan (Hebel) & Finishing Dinding</h2>
-                        <p class="text-xs text-slate-500">Hitung kebutuhan Hebel, Perekat, Plester, Acian, dan Cat secara akurat.</p>
-                    </div>
-                </div>
-
-                <!-- Toggle Ruangan vs Tembok Lurus -->
-                <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-bold w-full sm:w-auto">
-                    <button onclick="setWallMode('ruangan')" id="btnWallRuangan" class="px-3 py-1.5 rounded-lg transition bg-emerald-600 text-white shadow-sm flex-1 sm:flex-none">
-                        Ruangan (PxLxT)
-                    </button>
-                    <button onclick="setWallMode('lurus')" id="btnWallLurus" class="px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex-1 sm:flex-none">
-                        Tembok Lurus (PxT)
-                    </button>
+        <!-- TAB 1: DINDING & HEBEL -->
+        <section id="tabDinding" class="tab-content bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-emerald-600"></i> Kalkulator Bata Ringan (Hebel) & Finishing Dinding
+                </h2>
+                <div class="bg-slate-100 p-1 rounded-lg text-xs font-medium flex gap-1 border">
+                    <button onclick="setModeDinding('ruangan')" id="btnModeRuangan" class="px-2.5 py-1 rounded-md bg-emerald-600 text-white font-bold shadow-sm">Ruangan (PxLxT)</button>
+                    <button onclick="setModeDinding('lurus')" id="btnModeLurus" class="px-2.5 py-1 rounded-md text-slate-600">Tembok Lurus (PxT)</button>
                 </div>
             </div>
 
-            <div class="p-4 sm:p-6 space-y-6">
-                <!-- Inputs Section -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Panjang (m)</label>
-                        <input type="number" id="dindingP" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateDinding()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div id="wrapperDindingL">
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Lebar Ruangan (m)</label>
-                        <input type="number" id="dindingL" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateDinding()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tinggi Dinding (m)</label>
-                        <input type="number" id="dindingT" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateDinding()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang (m)</label>
+                    <input type="number" id="dinPanjang" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcDinding()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div id="colDinLebar">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Lebar Ruangan (m)</label>
+                    <input type="number" id="dinLebar" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcDinding()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tinggi Dinding (m)</label>
+                    <input type="number" id="dinTinggi" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcDinding()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tebal Bata Ringan</label>
+                    <select id="dinTebal" onchange="calcDinding()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900 focus:outline-none">
+                        <option value="7.5">7.5 cm (Standard - 1m³ ≈ 111 pcs)</option>
+                        <option value="10">10 cm (Tebal/Kedap - 1m³ ≈ 83 pcs)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Pintu Utama/Kamar</label>
+                    <div class="flex items-center">
+                        <button onclick="adjVal('dinPintu', -1); calcDinding()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold w-9 h-9 rounded-l-lg border border-r-0 border-slate-300">-</button>
+                        <input type="number" id="dinPintu" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcDinding()" class="w-full bg-slate-50 border-y border-slate-300 text-center font-bold text-sm h-9 focus:outline-none">
+                        <button onclick="adjVal('dinPintu', 1); calcDinding()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold w-9 h-9 rounded-r-lg border border-l-0 border-slate-300">+</button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tebal Bata Ringan</label>
-                        <select id="dindingTebal" onchange="calculateDinding()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                            <option value="7.5">7.5 cm (Standard - 1m³ ≈ 111 pcs)</option>
-                            <option value="10">10 cm (Tebal - 1m³ ≈ 83 pcs)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Pintu Utama/Kamar</label>
-                        <div class="flex items-center">
-                            <button type="button" onclick="adjustCounter('dindingPintu', -1, calculateDinding)" class="bg-slate-200 hover:bg-slate-300 px-3 py-2.5 rounded-l-xl font-bold text-slate-700">-</button>
-                            <input type="number" id="dindingPintu" value="0" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateDinding()"
-                                class="w-full text-center border-y border-slate-300 py-2.5 text-sm font-bold text-slate-800 focus:outline-none">
-                            <button type="button" onclick="adjustCounter('dindingPintu', 1, calculateDinding)" class="bg-slate-200 hover:bg-slate-300 px-3 py-2.5 rounded-r-xl font-bold text-slate-700">+</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Jendela</label>
-                        <div class="flex items-center">
-                            <button type="button" onclick="adjustCounter('dindingJendela', -1, calculateDinding)" class="bg-slate-200 hover:bg-slate-300 px-3 py-2.5 rounded-l-xl font-bold text-slate-700">-</button>
-                            <input type="number" id="dindingJendela" value="0" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateDinding()"
-                                class="w-full text-center border-y border-slate-300 py-2.5 text-sm font-bold text-slate-800 focus:outline-none">
-                            <button type="button" onclick="adjustCounter('dindingJendela', 1, calculateDinding)" class="bg-slate-200 hover:bg-slate-300 px-3 py-2.5 rounded-r-xl font-bold text-slate-700">+</button>
-                        </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Jendela</label>
+                    <div class="flex items-center">
+                        <button onclick="adjVal('dinJendela', -1); calcDinding()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold w-9 h-9 rounded-l-lg border border-r-0 border-slate-300">-</button>
+                        <input type="number" id="dinJendela" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcDinding()" class="w-full bg-slate-50 border-y border-slate-300 text-center font-bold text-sm h-9 focus:outline-none">
+                        <button onclick="adjVal('dinJendela', 1); calcDinding()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold w-9 h-9 rounded-r-lg border border-l-0 border-slate-300">+</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- Additional Material Options Checkboxes -->
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                    <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Sertakan Material Perekat & Finishing:</span>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-medium text-slate-700">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkThinbed" checked onchange="calculateDinding()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Semen Thinbed</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkPlester" checked onchange="calculateDinding()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Semen Plester</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkAcian" checked onchange="calculateDinding()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Semen Acian</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkCat" checked onchange="calculateDinding()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Cat Dinding (2 Lapis)</span>
-                        </label>
-                    </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                <span class="block text-xs font-bold text-slate-700 mb-2">Sertakan Material Perekat & Finishing:</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkThinbed" checked onchange="calcDinding()" class="accent-emerald-600 w-4 h-4"> Semen Thinbed</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkPlester" checked onchange="calcDinding()" class="accent-emerald-600 w-4 h-4"> Semen Plester</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkAcian" checked onchange="calcDinding()" class="accent-emerald-600 w-4 h-4"> Semen Acian</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkCat" checked onchange="calcDinding()" class="accent-emerald-600 w-4 h-4"> Cat Dinding (2 Lapis)</label>
                 </div>
+            </div>
 
-                <!-- Summary Result Card -->
-                <div class="bg-emerald-900 text-white rounded-xl p-4 sm:p-5 shadow-lg border border-emerald-800 space-y-4">
-                    <div class="flex justify-between items-center border-b border-emerald-800 pb-3">
-                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Hasil Perhitungan Dinding</span>
-                        <span id="dindingNetArea" class="text-sm font-bold text-amber-400">Luas Bersih: 0 m²</span>
-                    </div>
-
-                    <div id="dindingResultsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row justify-between items-center pt-2 border-t border-emerald-800 gap-3">
-                        <div class="text-xs text-emerald-200">
-                            Est. Total Dinding: <span id="dindingSubtotal" class="text-base font-extrabold text-amber-300 ml-1">Rp 0</span>
-                        </div>
-                        <button onclick="addDindingToCart()" 
-                            class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-lg text-xs transition shadow-md flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-cart-plus"></i>
-                            <span>Tambah ke Penawaran</span>
-                        </button>
-                    </div>
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                    <span class="text-xs text-slate-400">Luas Bersih Dinding: <strong id="resDinLuas" class="text-amber-400">0.0 m²</strong></span>
+                    <span class="text-xs text-slate-400">Estimasi Total Dinding: <strong id="resDinTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
+                <div id="resDinList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
+                <button onclick="addDindingToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                    <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Dinding ke Penawaran
+                </button>
             </div>
         </section>
 
-        <!-- MODULE 2: KERAMIK / GRANIT -->
-        <section id="module-keramik" class="tab-content hidden bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center space-x-3">
-                <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-xl font-bold">
-                    <i class="fa-solid fa-border-all text-xl"></i>
+        <!-- TAB 2: KERAMIK & GRANIT -->
+        <section id="tabKeramik" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+            <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-border-all text-emerald-600"></i> Kalkulator Lantai Keramik & Granit
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang Ruangan (m)</label>
+                    <input type="number" id="kerPanjang" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcKeramik()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900 text-lg">Kalkulator Keramik & Granit Lantai / Dinding</h2>
-                    <p class="text-xs text-slate-500">Hitung dus keramik/granit + marjin buangan (waste 5%), semen perekat, dan semen nat.</p>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Lebar Ruangan (m)</label>
+                    <input type="number" id="kerLebar" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcKeramik()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ukuran Keramik / Granit</label>
+                    <select id="kerUkuran" onchange="calcKeramik()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900 focus:outline-none">
+                        <option value="20x20">20 × 20 cm (1 Dus = 25 pcs = 1.00 m²)</option>
+                        <option value="25x25">25 × 25 cm (1 Dus = 16 pcs = 1.00 m²)</option>
+                        <option value="30x30">30 × 30 cm (1 Dus = 11 pcs = 0.99 m²)</option>
+                        <option value="40x40">40 × 40 cm (1 Dus = 6 pcs = 0.96 m²)</option>
+                        <option value="50x50">50 × 50 cm (1 Dus = 4 pcs = 1.00 m²)</option>
+                        <option value="60x60" selected>60 × 60 cm Granit (1 Dus = 4 pcs = 1.44 m²)</option>
+                        <option value="80x80">80 × 80 cm Granit (1 Dus = 3 pcs = 1.92 m²)</option>
+                        <option value="15x60">15 × 60 cm Motif Kayu (1 Dus = 12 pcs = 1.08 m²)</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="p-4 sm:p-6 space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Panjang Ruangan (m)</label>
-                        <input type="number" id="keramikP" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateKeramik()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Lebar Ruangan (m)</label>
-                        <input type="number" id="keramikL" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateKeramik()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Ukuran Keramik / Granit</label>
-                        <select id="keramikSize" onchange="calculateKeramik()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                            <option value="20">20 x 20 cm (25 pcs/dus ≈ 1.0 m²)</option>
-                            <option value="25">25 x 25 cm (16 pcs/dus ≈ 1.0 m²)</option>
-                            <option value="30">30 x 30 cm (11 pcs/dus ≈ 0.99 m²)</option>
-                            <option value="40">40 x 40 cm (6 pcs/dus ≈ 0.96 m²)</option>
-                            <option value="50">50 x 50 cm (4 pcs/dus ≈ 1.0 m²)</option>
-                            <option value="60">60 x 60 cm Granit (4 pcs/dus ≈ 1.44 m²)</option>
-                            <option value="80">80 x 80 cm Granit (3 pcs/dus ≈ 1.92 m²)</option>
-                            <option value="1560">15 x 60 cm Kayu (12 pcs/dus ≈ 1.08 m²)</option>
-                        </select>
-                    </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                <span class="block text-xs font-bold text-slate-700 mb-2">Pilihan Bahan Pelengkap Lantai:</span>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkKerSemenNat" checked onchange="calcKeramik()" class="accent-emerald-600 w-4 h-4"> Semen Pengisi Nat (1kg)</label>
+                    <label class="flex items-center gap-1.5 cursor-pointer font-medium"><input type="checkbox" id="chkKerMortar" checked onchange="calcKeramik()" class="accent-emerald-600 w-4 h-4"> Semen Mortar Perekat Keramik (40kg)</label>
                 </div>
+            </div>
 
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                    <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Sertakan Pengisi Nat & Perekat:</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-medium text-slate-700">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkNat" checked onchange="calculateKeramik()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Semen Nat Keramik (1 kg/10m²)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="chkPerekatKeramik" checked onchange="calculateKeramik()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                            <span>Mortar Perekat Keramik (40kg)</span>
-                        </label>
-                    </div>
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                    <span class="text-xs text-slate-400">Luas Lantai (+Cadangan 5%): <strong id="resKerLuas" class="text-amber-400">0.0 m²</strong></span>
+                    <span class="text-xs text-slate-400">Estimasi Total Lantai: <strong id="resKerTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
-
-                <!-- Result Card -->
-                <div class="bg-emerald-900 text-white rounded-xl p-4 sm:p-5 shadow-lg border border-emerald-800 space-y-4">
-                    <div class="flex justify-between items-center border-b border-emerald-800 pb-3">
-                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Hasil Perhitungan Keramik / Granit</span>
-                        <span id="keramikTotalArea" class="text-sm font-bold text-amber-400">Luas: 0 m² (+5% Waste)</span>
-                    </div>
-
-                    <div id="keramikResultsList" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row justify-between items-center pt-2 border-t border-emerald-800 gap-3">
-                        <div class="text-xs text-emerald-200">
-                            Est. Total Keramik: <span id="keramikSubtotal" class="text-base font-extrabold text-amber-300 ml-1">Rp 0</span>
-                        </div>
-                        <button onclick="addKeramikToCart()" 
-                            class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-lg text-xs transition shadow-md flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-cart-plus"></i>
-                            <span>Tambah ke Penawaran</span>
-                        </button>
-                    </div>
-                </div>
+                <div id="resKerList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
+                <button onclick="addKeramikToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                    <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Lantai ke Penawaran
+                </button>
             </div>
         </section>
 
-        <!-- MODULE 3: ATAP & RANGKA -->
-        <section id="module-atap" class="tab-content hidden bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center space-x-3">
-                <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-xl font-bold">
-                    <i class="fa-solid fa-house-chimney text-xl"></i>
+        <!-- TAB 3: ATAP & RANGKA -->
+        <section id="tabAtap" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+            <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-house-chimney text-emerald-600"></i> Kalkulator Atap Genteng & Rangka Baja Ringan
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang Bangunan (m)</label>
+                    <input type="number" id="atpPanjang" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900 text-lg">Kalkulator Atap Genteng & Rangka Baja Ringan</h2>
-                    <p class="text-xs text-slate-500">Hitung kebutuhan genteng, nok/kerpus, kanal C, reng, dan baut roofing.</p>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Lebar Bangunan (m)</label>
+                    <input type="number" id="atpLebar" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Overtek/Tiris (m)</label>
+                    <input type="number" id="atpOvertek" value="0.8" step="0.1" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Sudut Kemiringan (°)</label>
+                    <input type="number" id="atpSudut" value="30" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
             </div>
 
-            <div class="p-4 sm:p-6 space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Panjang Bangunan (m)</label>
-                        <input type="number" id="atapP" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateAtap()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Lebar Bangunan (m)</label>
-                        <input type="number" id="atapL" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateAtap()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Overtek Atap (m)</label>
-                        <input type="number" id="atapOvertek" value="0.8" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateAtap()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Sudut Kemiringan (°)</label>
-                        <input type="number" id="atapSudut" value="30" step="1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateAtap()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Genteng Utama</label>
+                    <select id="atpJenisGenteng" onchange="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900 focus:outline-none">
+                        <option value="gtgKeramik">Genteng Keramik Berglazur (≈ 14 pcs/m²)</option>
+                        <option value="gtgBeton">Genteng Beton Gelombang/Flat (≈ 10 pcs/m²)</option>
+                        <option value="gtgMetal">Genteng Metal Pasir (≈ 1.6 lembar/m²)</option>
+                        <option value="gtgMorando">Genteng Morando/Palentong Super (≈ 18 pcs/m²)</option>
+                        <option value="gtgTanah">Genteng Tanah Liat Press (≈ 25 pcs/m²)</option>
+                    </select>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Genteng / Penutup Atap</label>
-                        <select id="atapJenis" onchange="calculateAtap()" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                            <option value="keramik">Genteng Keramik (≈ 14 pcs/m²)</option>
-                            <option value="beton">Genteng Beton (≈ 11 pcs/m²)</option>
-                            <option value="metal">Genteng Metal Pasir (≈ 1.6 lembar/m²)</option>
-                            <option value="morando">Genteng Morando Glazur (≈ 20 pcs/m²)</option>
-                            <option value="tanah">Genteng Tanah Liat / Sokka (≈ 25 pcs/m²)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Panjang Bubungan / Nok (m)</label>
-                        <input type="number" id="atapNok" value="0" step="0.5" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateAtap()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang Bubungan / Nok (m)</label>
+                    <input type="number" id="atpPanjangNok" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcAtap()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
+            </div>
 
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                    <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rangka Atap:</span>
-                    <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
-                        <input type="checkbox" id="chkRangkaBaja" checked onchange="calculateAtap()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                        <span>Sertakan Rangka Baja Ringan (Kanal C75, Reng, Baut Roofing)</span>
-                    </label>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-800">
+                    <input type="checkbox" id="chkAtpBajaRingan" checked onchange="calcAtap()" class="accent-emerald-600 w-4 h-4"> Include Paket Rangka Baja Ringan (Kanal C75, Reng, Baut Roofing)
+                </label>
+            </div>
+
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                    <span class="text-xs text-slate-400">Luas Atap Miring: <strong id="resAtpLuas" class="text-amber-400">0.0 m²</strong></span>
+                    <span class="text-xs text-slate-400">Estimasi Total Atap: <strong id="resAtpTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
-
-                <!-- Result Card -->
-                <div class="bg-emerald-900 text-white rounded-xl p-4 sm:p-5 shadow-lg border border-emerald-800 space-y-4">
-                    <div class="flex justify-between items-center border-b border-emerald-800 pb-3">
-                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Hasil Perhitungan Atap</span>
-                        <span id="atapSlopedArea" class="text-sm font-bold text-amber-400">Luas Atap Miring: 0 m²</span>
-                    </div>
-
-                    <div id="atapResultsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row justify-between items-center pt-2 border-t border-emerald-800 gap-3">
-                        <div class="text-xs text-emerald-200">
-                            Est. Total Atap: <span id="atapSubtotal" class="text-base font-extrabold text-amber-300 ml-1">Rp 0</span>
-                        </div>
-                        <button onclick="addAtapToCart()" 
-                            class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-lg text-xs transition shadow-md flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-cart-plus"></i>
-                            <span>Tambah ke Penawaran</span>
-                        </button>
-                    </div>
-                </div>
+                <div id="resAtpList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
+                <button onclick="addAtapToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                    <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Atap ke Penawaran
+                </button>
             </div>
         </section>
 
-        <!-- MODULE 4: COR BETON DAK -->
-        <section id="module-cor" class="tab-content hidden bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center space-x-3">
-                <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-xl font-bold">
-                    <i class="fa-solid fa-layer-group text-xl"></i>
+        <!-- TAB 4: COR BETON DAK -->
+        <section id="tabBeton" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+            <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-emerald-600"></i> Kalkulator Cor Beton Dak Lantai 2 (K-225 Standard)
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Panjang Dak (m)</label>
+                    <input type="number" id="btnPanjang" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcBeton()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-900 text-lg">Kalkulator Cor Beton Dak Lantai / Slab</h2>
-                    <p class="text-xs text-slate-500">Hitung semen PC, pasir cor, batu split, dan wiremesh besi cor (Standar K-225/1:2:3).</p>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Lebar Dak (m)</label>
+                    <input type="number" id="btnLebar" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcBeton()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tebal Cor Dak (cm)</label>
+                    <input type="number" id="btnTebal" value="12" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="calcBeton()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
                 </div>
             </div>
 
-            <div class="p-4 sm:p-6 space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Panjang Dak (m)</label>
-                        <input type="number" id="corP" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateCor()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Lebar Dak (m)</label>
-                        <input type="number" id="corL" value="0" step="0.1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateCor()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tebal Dak (cm)</label>
-                        <input type="number" id="corTebal" value="12" step="1" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="calculateCor()"
-                            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4">
+                <label class="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-800">
+                    <input type="checkbox" id="chkBtnWiremesh" checked onchange="calcBeton()" class="accent-emerald-600 w-4 h-4"> Sertakan Besi Wiremesh M8 (Ukuran Lembar 2.1m × 5.4m)
+                </label>
+            </div>
+
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                    <span class="text-xs text-slate-400">Volume Cor: <strong id="resBtnVol" class="text-amber-400">0.00 m³</strong></span>
+                    <span class="text-xs text-slate-400">Estimasi Total Cor: <strong id="resBtnTotal" class="text-emerald-400 text-sm">Rp 0</strong></span>
                 </div>
-
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-                    <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Penulangan Beton:</span>
-                    <label class="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
-                        <input type="checkbox" id="chkWiremesh" checked onchange="calculateCor()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
-                        <span>Sertakan Wiremesh M8 (Ukuran Lembar 2.1 x 5.4 m)</span>
-                    </label>
-                </div>
-
-                <!-- Result Card -->
-                <div class="bg-emerald-900 text-white rounded-xl p-4 sm:p-5 shadow-lg border border-emerald-800 space-y-4">
-                    <div class="flex justify-between items-center border-b border-emerald-800 pb-3">
-                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Hasil Perhitungan Cor Dak</span>
-                        <span id="corVolumeM3" class="text-sm font-bold text-amber-400">Volume Cor: 0 m³</span>
-                    </div>
-
-                    <div id="corResultsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row justify-between items-center pt-2 border-t border-emerald-800 gap-3">
-                        <div class="text-xs text-emerald-200">
-                            Est. Total Cor Dak: <span id="corSubtotal" class="text-base font-extrabold text-amber-300 ml-1">Rp 0</span>
-                        </div>
-                        <button onclick="addCorToCart()" 
-                            class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-lg text-xs transition shadow-md flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-cart-plus"></i>
-                            <span>Tambah ke Penawaran</span>
-                        </button>
-                    </div>
-                </div>
+                <div id="resBtnList" class="text-xs space-y-1 text-slate-300 mb-3"></div>
+                <button onclick="addBetonToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow transition">
+                    <i class="fa-solid fa-cart-plus"></i> Tambahkan Paket Cor Beton ke Penawaran
+                </button>
             </div>
         </section>
 
     </main>
 
-    <!-- MODAL 1: MASTER HARGA & PENGATURAN TOKO (SKENARIO A - DYNAMIC LIST) -->
-    <div id="masterHargaModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden transition-all">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-            
-            <!-- Modal Header -->
-            <div class="bg-brand-900 text-white p-4 px-6 flex justify-between items-center border-b border-slate-800">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-amber-400/20 text-amber-400 p-2 rounded-lg">
-                        <i class="fa-solid fa-sliders text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base sm:text-lg">Pengaturan Toko & Master Harga Dinamis</h3>
-                        <p class="text-[11px] text-slate-300">Skenario A: Tambah, edit, dan hapus master harga material toko.</p>
-                    </div>
-                </div>
-                <button onclick="closeMasterHargaModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+    <!-- MODAL POPUP: PENAWARAN & STRUK INVOICE -->
+    <div id="modalCart" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center no-print">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Struk & Proforma Invoice Penawaran
+                </h3>
+                <button onclick="closeModal('modalCart')" class="text-slate-400 hover:text-white text-lg font-bold w-8 h-8 rounded-full flex items-center justify-center">&times;</button>
             </div>
 
-            <!-- Modal Content -->
-            <div class="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1 bg-slate-50/50">
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
                 
-                <!-- Section 1: Profil Toko (White-Label) -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-                    <div class="flex items-center space-x-2 text-emerald-700 font-bold text-xs uppercase tracking-wider">
-                        <i class="fa-solid fa-store"></i>
-                        <span>Profil Toko (White-Label)</span>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Toko Bangunan</label>
-                            <input type="text" id="editStoreName" value="TB. MAJU JAYA MAKMUR" 
-                                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat & WA Toko</label>
-                            <input type="text" id="editStoreAddress" value="Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890" 
-                                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        </div>
-                    </div>
+                <!-- PRINT KOP SURAT (PRINT ONLY) -->
+                <div class="hidden print-only text-center border-b border-slate-400 pb-3 mb-4">
+                    <h2 id="printStoreName" class="text-xl font-bold uppercase">TB. MAJU JAYA MAKMUR</h2>
+                    <p id="printStoreDesc" class="text-xs text-slate-600">Jl. Raya Bangunan No. 88 &bull; WA: 0812-3456-7890</p>
+                    <p class="text-sm font-bold uppercase mt-2 text-slate-800">PROFORMA INVOICE PENAWARAN MATERIAL</p>
                 </div>
 
-                <!-- Section 2: Master Harga Satuan Material (Dynamic Rows) -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                        <div class="flex items-center space-x-2 text-emerald-700 font-bold text-xs uppercase tracking-wider">
-                            <i class="fa-solid fa-tags"></i>
-                            <span>Master Harga Satuan Material (Rp)</span>
-                        </div>
-                        
-                        <!-- Tombol Tambah Material (Skenario A) -->
-                        <button type="button" onclick="addNewMaterialRow()" 
-                            class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs">
-                            <i class="fa-solid fa-plus text-emerald-600"></i>
-                            <span>Tambah Material Baru</span>
-                        </button>
-                    </div>
-
-                    <!-- Table Data Material -->
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-72 overflow-y-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200 sticky top-0 z-10">
-                                <tr>
-                                    <th class="p-2.5">Nama Material</th>
-                                    <th class="p-2.5 w-24">Satuan</th>
-                                    <th class="p-2.5 text-right w-36">Harga Satuan (Rp)</th>
-                                    <th class="p-2.5 text-center w-14">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="masterPriceTableBody" class="divide-y divide-slate-100 font-medium">
-                                <!-- Dynamic rows via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-4 bg-white border-t border-slate-200 flex justify-between items-center">
-                <button onclick="resetMasterPricesToDefault()" class="text-xs text-red-500 hover:text-red-700 font-semibold transition">
-                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset ke Standard
-                </button>
-                <button onclick="saveMasterSettings()" 
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md transition flex items-center space-x-2">
-                    <i class="fa-solid fa-check"></i>
-                    <span>Simpan Pengaturan</span>
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MODAL 2: PENAWARAN & PROFORMA INVOICE CART -->
-    <div id="cartModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden transition-all">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-            
-            <!-- Modal Header -->
-            <div class="bg-brand-900 text-white p-4 px-6 flex justify-between items-center border-b border-slate-800">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold">
-                        <i class="fa-solid fa-file-invoice-dollar text-lg"></i>
+                <!-- INFO PELANGGAN FORM -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 no-print">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pelanggan / Proyek</label>
+                        <input type="text" id="custName" placeholder="Contoh: Pak Haji Ahmad" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900 focus:outline-none">
                     </div>
                     <div>
-                        <h3 class="font-bold text-base sm:text-lg">Daftar Penawaran & Proforma Invoice</h3>
-                        <p class="text-[11px] text-slate-300">Rekapitulasi total material, diskon toko, dan simulasi pembayaran DP.</p>
-                    </div>
-                </div>
-                <button onclick="closeCartModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <!-- Modal Body (Printable Area) -->
-            <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 bg-slate-50/30" id="printArea">
-                
-                <!-- Print Header (Only visible on print) -->
-                <div class="hidden print:block border-b-2 border-slate-800 pb-3 mb-4">
-                    <h1 id="printStoreName" class="text-2xl font-black text-slate-900 uppercase">TB. MAJU JAYA MAKMUR</h1>
-                    <p id="printStoreAddress" class="text-xs text-slate-600">Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890</p>
-                    <div class="text-right text-xs font-bold text-slate-500 mt-2">
-                        SURAT PENAWARAN HARGA MATERIAL
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp / Catatan</label>
+                        <input type="text" id="custPhone" placeholder="Contoh: 0812xxxx (Ruko Cluster B)" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900 focus:outline-none">
                     </div>
                 </div>
 
-                <!-- Customer Details Form -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3.5 rounded-xl border border-slate-200">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pelanggan / Proyek</label>
-                        <input type="text" id="custName" placeholder="Contoh: Pak Budi - Proyek Rumah" 
-                            class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">No. HP / Catatan Tambahan</label>
-                        <input type="text" id="custPhone" placeholder="Contoh: 0812-xxxx-xxxx / Kirim Besok" 
-                            class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    </div>
-                </div>
-
-                <!-- Cart Items Table -->
-                <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+                <!-- TABLE DAFTAR BELANJA -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                             <tr>
-                                <th class="p-2.5">Material</th>
+                                <th class="p-2.5">Item Material</th>
                                 <th class="p-2.5 text-center">Jumlah</th>
                                 <th class="p-2.5 text-right">Harga Satuan</th>
                                 <th class="p-2.5 text-right">Total</th>
-                                <th class="p-2.5 text-center w-10 no-print">Aksi</th>
+                                <th class="p-2.5 text-center no-print">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="cartTableBody" class="divide-y divide-slate-100 font-medium">
-                            <!-- Populated by JS -->
+                            <!-- Dynamic Cart Items -->
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Financial Calculation (Diskon & DP) -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
-                    <div class="flex justify-between items-center text-slate-600">
-                        <span>Subtotal Material:</span>
-                        <span id="cartSubtotal" class="font-bold text-slate-800">Rp 0</span>
+                <!-- KALKULASI DISKON & DP -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-semibold text-slate-600">Subtotal Material:</span>
+                        <span id="cartSubtotal" class="font-bold text-slate-900">Rp 0</span>
                     </div>
-
-                    <div class="flex justify-between items-center text-slate-600 gap-3">
-                        <label for="cartDiscount" class="shrink-0">Diskon Toko (Rp):</label>
-                        <input type="number" id="cartDiscount" value="0" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="updateCartTotals()" 
-                            class="w-36 px-2.5 py-1 text-right border border-slate-300 rounded-md font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <div class="flex justify-between items-center text-xs gap-2 no-print">
+                        <span class="font-semibold text-slate-600">Diskon Toko (Rp):</span>
+                        <input type="number" id="cartDiscount" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="renderCart()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
-
-                    <div class="flex justify-between items-center text-slate-900 font-extrabold text-sm border-t border-slate-200 pt-2">
-                        <span>Grand Total:</span>
-                        <span id="cartGrandTotal" class="text-emerald-700">Rp 0</span>
+                    <div class="flex justify-between items-center text-xs gap-2 no-print">
+                        <span class="font-semibold text-slate-600">Uang Muka / DP (Rp):</span>
+                        <input type="number" id="cartDP" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="renderCart()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
-
-                    <div class="flex justify-between items-center text-slate-600 gap-3 pt-1">
-                        <label for="cartDP" class="shrink-0">Uang Muka / DP (Rp):</label>
-                        <input type="number" id="cartDP" value="0" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this)" oninput="updateCartTotals()" 
-                            class="w-36 px-2.5 py-1 text-right border border-slate-300 rounded-md font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <div class="pt-2 border-t border-slate-300 flex justify-between items-center font-bold text-sm">
+                        <span class="text-slate-900">GRAND TOTAL:</span>
+                        <span id="cartGrandTotal" class="text-emerald-700 font-extrabold text-base">Rp 0</span>
                     </div>
-
-                    <div class="flex justify-between items-center text-amber-700 font-bold border-t border-dashed border-slate-200 pt-2">
-                        <span>Sisa Pelunasan:</span>
-                        <span id="cartRemaining" class="text-base">Rp 0</span>
+                    <div class="flex justify-between items-center text-xs font-bold text-amber-800">
+                        <span>SISA PELUNASAN (COD/TEMPO):</span>
+                        <span id="cartSisa">Rp 0</span>
                     </div>
                 </div>
 
-                <!-- Saved Quotes History Section (No Print) -->
-                <div class="no-print bg-slate-100 p-3.5 rounded-xl border border-slate-200 space-y-2">
+                <!-- PANEL RIWAYAT PENAWARAN -->
+                <div class="no-print pt-2 border-t border-slate-200">
+                    <h4 class="font-bold text-xs text-slate-700 mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Riwayat Penawaran Tersimpan
+                    </h4>
+                    <div id="historyList" class="space-y-1.5 max-h-36 overflow-y-auto text-xs">
+                        <!-- Dynamic History Items -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-slate-100 p-3 sm:p-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-2 no-print">
+                <div class="flex gap-1.5">
+                    <button onclick="saveHistory()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan
+                    </button>
+                    <button onclick="clearCart()" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs px-3 py-2 rounded-lg transition">
+                        Kosongkan
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="shareWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Kirim WA
+                    </button>
+                    <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Cetak PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: MASTER HARGA DINAMIS (SKENARIO A) -->
+    <div id="modalSettings" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-400"></i> Pengaturan Toko & Master Harga (Skenario A)
+                </h3>
+                <button onclick="closeModal('modalSettings')" class="text-slate-400 hover:text-white text-lg font-bold w-8 h-8 rounded-full flex items-center justify-center">&times;</button>
+            </div>
+
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs">
+                <!-- PROFIL TOKO -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-store text-emerald-600"></i> Profil Toko (White-Label)
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-600 mb-0.5 font-semibold">Nama Toko Bangunan</label>
+                            <input type="text" id="cfgStoreName" class="w-full border rounded p-1.5 font-bold text-xs focus:outline-none focus:border-emerald-600">
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 mb-0.5 font-semibold">Alamat & WA Toko</label>
+                            <input type="text" id="cfgStoreDesc" class="w-full border rounded p-1.5 font-bold text-xs focus:outline-none focus:border-emerald-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MASTER HARGA DINAMIS TABLE -->
+                <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-history mr-1"></i> Riwayat Penawaran Tersimpan</span>
-                        <button onclick="saveCurrentQuoteToHistory()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-md transition">
-                            Simpan ke Riwayat
-                        </button>
+                        <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-tags text-emerald-600"></i> Daftar Master Harga Material
+                        </h4>
+                        <div class="flex gap-2">
+                            <button onclick="resetMasterPricesToDefault()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Default
+                            </button>
+                            <button onclick="addNewMaterialRow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-lg transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Tambah Material Baru
+                            </button>
+                        </div>
                     </div>
-                    <div id="quoteHistoryList" class="space-y-1.5 max-h-32 overflow-y-auto text-xs">
-                        <!-- Populated by JS -->
+
+                    <div class="border border-slate-200 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 font-bold text-slate-700 sticky top-0 border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2">Nama Material</th>
+                                    <th class="p-2 w-24">Satuan</th>
+                                    <th class="p-2 text-right w-32">Harga Satuan (Rp)</th>
+                                    <th class="p-2 text-center w-12">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="priceTableBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
             </div>
 
-            <!-- Modal Footer / Action Buttons (No Print) -->
-            <div class="p-4 bg-white border-t border-slate-200 flex flex-wrap gap-2 justify-between items-center no-print">
-                <button onclick="clearCart()" class="text-xs text-red-500 hover:text-red-700 font-bold transition flex items-center space-x-1">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>Kosongkan</span>
-                </button>
-
-                <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="shareQuoteWA()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-sm flex items-center space-x-1.5">
-                        <i class="fa-brands fa-whatsapp text-sm"></i>
-                        <span>Kirim WA</span>
-                    </button>
-
-                    <button onclick="printQuotePDF()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-sm flex items-center space-x-1.5">
-                        <i class="fa-solid fa-print"></i>
-                        <span>Cetak PDF</span>
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- CUSTOM TOAST NOTIFICATION CONTAINER -->
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- CUSTOM CONFIRM DIALOG MODAL (REPLACES NATIVE CONFIRM) -->
-    <div id="customConfirmModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 text-center border border-slate-200">
-            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div>
-                <h4 id="confirmModalTitle" class="font-bold text-slate-900 text-base">Konfirmasi Hapus</h4>
-                <p id="confirmModalText" class="text-xs text-slate-500 mt-1">Apakah Anda yakin ingin menghapus item ini?</p>
-            </div>
-            <div class="flex justify-center space-x-3 pt-2">
-                <button onclick="closeConfirmModal(false)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl text-xs transition">
-                    Batal
-                </button>
-                <button id="btnConfirmAction" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm">
-                    Ya, Hapus
+            <div class="bg-slate-100 p-3 border-t border-slate-200 flex justify-end gap-2">
+                <button onclick="saveSettings()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition">
+                    <i class="fa-solid fa-check"></i> Simpan Pengaturan
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 py-4 text-center text-xs border-t border-slate-800 no-print">
-        <p>&copy; 2026 Toko Bangunan Pro • Sistem Pengelolaan & Kalkulator Material Presisi</p>
-    </footer>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none flex items-center gap-2 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span id="toastMsg">Notifikasi</span>
+    </div>
 
-    <!-- JAVASCRIPT APP ENGINE -->
+    <!-- JAVASCRIPT CORE LOGIC -->
     <script>
-        // ==========================================
-        // DEFAULT MASTER PRICES & STORE PROFILE DATA
-        // ==========================================
-        const DEFAULT_MASTER_PRICES = [
-            { id: 'hebel75', name: 'Hebel 7.5 cm (per m³)', unit: 'm³', price: 650000 },
-            { id: 'hebel100', name: 'Hebel 10 cm (per m³)', unit: 'm³', price: 650000 },
-            { id: 'thinbed', name: 'Semen Thinbed Perekat (40kg)', unit: 'sak', price: 85000 },
-            { id: 'plester', name: 'Semen Plester (50kg)', unit: 'sak', price: 55000 },
+        // MASTER HARGA DEFAULT (ARRAY STRUCTURE FOR DYNAMIC ADD/DELETE)
+        const DEFAULT_MATERIALS = [
+            { id: 'hebel75', name: 'Bata Ringan (Hebel) 7.5cm', unit: 'm³', price: 650000 },
+            { id: 'hebel100', name: 'Bata Ringan (Hebel) 10cm', unit: 'm³', price: 650000 },
+            { id: 'thinbed', name: 'Semen Thinbed (40kg)', unit: 'sak', price: 85000 },
+            { id: 'plester', name: 'Semen Plester (40kg)', unit: 'sak', price: 55000 },
             { id: 'acian', name: 'Semen Acian (40kg)', unit: 'sak', price: 65000 },
-            { id: 'cat', name: 'Cat Dinding (20kg)', unit: 'pail', price: 650000 },
-            { id: 'keramik_20', name: 'Keramik 20x20', unit: 'dus', price: 60000 },
-            { id: 'keramik_25', name: 'Keramik 25x25', unit: 'dus', price: 62000 },
-            { id: 'keramik_30', name: 'Keramik 30x30', unit: 'dus', price: 65000 },
-            { id: 'keramik_40', name: 'Keramik 40x40', unit: 'dus', price: 70000 },
-            { id: 'keramik_50', name: 'Keramik 50x50', unit: 'dus', price: 80000 },
-            { id: 'granit_60', name: 'Granit 60x60', unit: 'dus', price: 135000 },
-            { id: 'granit_80', name: 'Granit 80x80', unit: 'dus', price: 185000 },
-            { id: 'granit_1560', name: 'Keramik Motif Kayu 15x60', unit: 'dus', price: 95000 },
-            { id: 'semen_nat', name: 'Semen Nat Keramik (1kg)', unit: 'bungkus', price: 18000 },
-            { id: 'semen_perekat_keramik', name: 'Mortar Perekat Keramik (40kg)', unit: 'sak', price: 90000 },
-            { id: 'genteng_keramik', name: 'Genteng Keramik', unit: 'pcs', price: 11000 },
-            { id: 'genteng_beton', name: 'Genteng Beton', unit: 'pcs', price: 8500 },
-            { id: 'genteng_metal', name: 'Genteng Metal Pasir', unit: 'lembar', price: 38000 },
-            { id: 'genteng_morando', name: 'Genteng Morando Glazur', unit: 'pcs', price: 4500 },
-            { id: 'genteng_tanah', name: 'Genteng Sokka / Tanah', unit: 'pcs', price: 2800 },
-            { id: 'genteng_nok', name: 'Genteng Nok / Kerpus', unit: 'pcs', price: 12000 },
-            { id: 'kanal_c', name: 'Baja Ringan Kanal C75 (6m)', unit: 'batang', price: 85000 },
-            { id: 'reng', name: 'Reng Baja Ringan (6m)', unit: 'batang', price: 42000 },
-            { id: 'baut_roofing', name: 'Baut Roofing (100pcs)', unit: 'dus', price: 25000 },
-            { id: 'semen_pc', name: 'Semen Gresik/Tiga Roda 50kg', unit: 'sak', price: 68000 },
-            { id: 'pasir_cor', name: 'Pasir Cor Hitam', unit: 'm³', price: 320000 },
-            { id: 'split', name: 'Batu Split Cor', unit: 'm³', price: 280000 },
-            { id: 'wiremesh_m8', name: 'Wiremesh M8 (2.1 x 5.4m)', unit: 'lembar', price: 680000 }
+            { id: 'catDinding', name: 'Cat Dinding (5kg)', unit: 'galon', price: 135000 },
+
+            { id: 'ker2020', name: 'Keramik 20x20', unit: 'dus', price: 55000 },
+            { id: 'ker2525', name: 'Keramik 25x25', unit: 'dus', price: 60000 },
+            { id: 'ker3030', name: 'Keramik 30x30', unit: 'dus', price: 62000 },
+            { id: 'ker4040', name: 'Keramik 40x40', unit: 'dus', price: 68000 },
+            { id: 'ker5050', name: 'Keramik 50x50', unit: 'dus', price: 75000 },
+            { id: 'ker6060', name: 'Granit 60x60', unit: 'dus', price: 125000 },
+            { id: 'ker8080', name: 'Granit 80x80', unit: 'dus', price: 195000 },
+            { id: 'ker1560', name: 'Keramik Kayu 15x60', unit: 'dus', price: 110000 },
+            { id: 'semenNat', name: 'Semen Pengisi Nat (1kg)', unit: 'kg', price: 18000 },
+            { id: 'mortarKeramik', name: 'Semen Mortar Keramik (40kg)', unit: 'sak', price: 95000 },
+
+            { id: 'gtgKeramik', name: 'Genteng Keramik', unit: 'pcs', price: 11500 },
+            { id: 'gtgBeton', name: 'Genteng Beton', unit: 'pcs', price: 9500 },
+            { id: 'gtgMetal', name: 'Genteng Metal Pasir', unit: 'lembar', price: 45000 },
+            { id: 'gtgMorando', name: 'Genteng Morando', unit: 'pcs', price: 4800 },
+            { id: 'gtgTanah', name: 'Genteng Tanah Liat', unit: 'pcs', price: 3200 },
+            { id: 'gtgNok', name: 'Genteng Nok / Bubungan', unit: 'pcs', price: 16000 },
+            { id: 'kanalC75', name: 'Baja Ringan Kanal C75 (6m)', unit: 'batang', price: 95000 },
+            { id: 'reng', name: 'Reng Baja Ringan (6m)', unit: 'batang', price: 48000 },
+            { id: 'bautRoofing', name: 'Baut Roofing', unit: 'pcs', price: 350 },
+
+            { id: 'semenPC', name: 'Semen PC (40kg)', unit: 'sak', price: 68000 },
+            { id: 'pasirCor', name: 'Pasir Cor', unit: 'm³', price: 320000 },
+            { id: 'split', name: 'Koral / Split', unit: 'm³', price: 340000 },
+            { id: 'wiremeshM8', name: 'Besi Wiremesh M8', unit: 'lembar', price: 580000 }
         ];
 
-        const DEFAULT_STORE_PROFILE = {
-            name: 'TB. MAJU JAYA MAKMUR',
-            address: 'Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890'
-        };
-
-        // Application State Variables
+        // GLOBAL APP STATE
         let masterPrices = [];
-        let storeProfile = {};
-        let cartItems = [];
-        let activeWallMode = 'ruangan'; // 'ruangan' or 'lurus'
-        let pendingConfirmCallback = null;
+        let storeProfile = { name: "TB. MAJU JAYA MAKMUR", desc: "Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890" };
+        let cart = [];
+        let historyQuotes = [];
+        let modeDinding = 'ruangan';
 
-        // Load data from LocalStorage on initialization
-        function initApp() {
-            // Load Store Profile
+        // INITIALIZATION WITH AUTO-REPAIR FOR LOCALSTORAGE
+        window.addEventListener('DOMContentLoaded', () => {
+            initStoreProfile();
+            initMasterPrices();
+            initCartAndHistory();
+            
+            calcDinding();
+            calcKeramik();
+            calcAtap();
+            calcBeton();
+            renderCart();
+            renderHistory();
+        });
+
+        function initStoreProfile() {
             const savedProfile = localStorage.getItem('tb_store_profile');
-            storeProfile = savedProfile ? JSON.parse(savedProfile) : { ...DEFAULT_STORE_PROFILE };
-            
-            // Load Master Prices
-            const savedPrices = localStorage.getItem('tb_master_prices');
-            masterPrices = savedPrices ? JSON.parse(savedPrices) : JSON.parse(JSON.stringify(DEFAULT_MASTER_PRICES));
-
-            // Load Cart
-            const savedCart = localStorage.getItem('tb_cart_items');
-            cartItems = savedCart ? JSON.parse(savedCart) : [];
-
-            // Sync Header UI
-            applyStoreProfileUI();
-            updateCartCount();
-
-            // Run initial calculations
-            calculateDinding();
-            calculateKeramik();
-            calculateAtap();
-            calculateCor();
-        }
-
-        function applyStoreProfileUI() {
-            document.getElementById('headerStoreName').innerText = storeProfile.name;
-            document.getElementById('headerStoreAddress').innerHTML = `<i class="fa-solid fa-location-dot text-amber-400"></i> <span>${storeProfile.address}</span>`;
-            
-            document.getElementById('editStoreName').value = storeProfile.name;
-            document.getElementById('editStoreAddress').value = storeProfile.address;
-
-            document.getElementById('printStoreName').innerText = storeProfile.name;
-            document.getElementById('printStoreAddress').innerText = storeProfile.address;
-        }
-
-        // Helper to format currency (Rp)
-        function formatRp(num) {
-            return 'Rp ' + Math.round(num).toLocaleString('id-ID');
-        }
-
-        // Helper to get material price by name/ID lookup
-        function getPrice(keyName) {
-            const found = masterPrices.find(m => m.id === keyName || m.name.toLowerCase().includes(keyName.toLowerCase()));
-            return found ? found.price : 0;
-        }
-
-        // Auto-clear input value if '0' on focus, restore on blur
-        function handleInputFocus(input) {
-            if (input.value === '0') {
-                input.value = '';
+            if (savedProfile) {
+                try {
+                    const parsed = JSON.parse(savedProfile);
+                    if (parsed && parsed.name) storeProfile = parsed;
+                } catch(e){}
             }
+            loadStoreProfile();
         }
 
-        function handleInputBlur(input) {
-            if (input.value.trim() === '') {
-                input.value = '0';
+        function loadStoreProfile() {
+            const nameEl = document.getElementById('headerStoreName');
+            const descEl = document.getElementById('headerStoreDesc');
+            if (nameEl) nameEl.innerHTML = `${storeProfile.name} <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded">PRO</span>`;
+            if (descEl) descEl.innerHTML = `<i class="fa-solid fa-location-dot text-amber-300"></i> ${storeProfile.desc}`;
+            
+            const pName = document.getElementById('printStoreName');
+            const pDesc = document.getElementById('printStoreDesc');
+            if (pName) pName.innerText = storeProfile.name;
+            if (pDesc) pDesc.innerText = storeProfile.desc;
+        }
+
+        // AUTO-REPAIR / CONVERT MASTER PRICES TO ARRAY IF LEGACY OBJECT EXISTS
+        function initMasterPrices() {
+            const saved = localStorage.getItem('tb_master_prices_v2');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        masterPrices = parsed;
+                        return;
+                    }
+                } catch(e) {}
             }
+            
+            // If fallback or old structure found
+            masterPrices = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+            localStorage.setItem('tb_master_prices_v2', JSON.stringify(masterPrices));
         }
 
-        // Counter Stepper Helper
-        function adjustCounter(inputId, amount, callback) {
-            const input = document.getElementById(inputId);
-            let val = parseInt(input.value) || 0;
-            val = Math.max(0, val + amount);
-            input.value = val;
-            if (callback) callback();
+        function initCartAndHistory() {
+            try {
+                cart = JSON.parse(localStorage.getItem('tb_cart')) || [];
+                historyQuotes = JSON.parse(localStorage.getItem('tb_history')) || [];
+            } catch(e) { cart = []; historyQuotes = []; }
         }
 
-        // Tab Navigation Switcher
-        function switchTab(tabKey) {
+        // PRICE LOOKUP HELPER
+        function getMaterialPrice(id) {
+            const item = masterPrices.find(m => m.id === id);
+            return item ? item.price : 0;
+        }
+
+        // INPUT FOCUS HANDLERS
+        function handleFocus(el) { if (el.value === '0') el.value = ''; }
+        function handleBlur(el) { if (el.value === '') el.value = '0'; }
+        function adjVal(id, delta) {
+            const el = document.getElementById(id);
+            let val = (parseFloat(el.value) || 0) + delta;
+            el.value = Math.max(0, val);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2500);
+        }
+
+        // PRESETS
+        function applyPreset(p, l, t) {
+            setModeDinding('ruangan');
+            document.getElementById('dinPanjang').value = p;
+            document.getElementById('dinLebar').value = l;
+            document.getElementById('dinTinggi').value = t;
+            
+            document.getElementById('kerPanjang').value = p;
+            document.getElementById('kerLebar').value = l;
+
+            calcDinding();
+            calcKeramik();
+            showToast(`Preset Kamar ${p}x${l}m diterapkan!`);
+        }
+
+        function applyPresetPagar(p, t) {
+            setModeDinding('lurus');
+            document.getElementById('dinPanjang').value = p;
+            document.getElementById('dinTinggi').value = t;
+            calcDinding();
+            showToast(`Preset Pagar ${p}x${t}m diterapkan!`);
+        }
+
+        // TABS
+        function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-600', 'text-white');
-                btn.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-100');
+                btn.className = "tab-btn bg-slate-200 text-slate-700 font-semibold py-2.5 px-2 rounded-xl border border-slate-300 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition";
             });
 
-            document.getElementById('module-' + tabKey).classList.remove('hidden');
-            const activeBtn = document.getElementById('nav-' + tabKey);
-            activeBtn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-100');
-            activeBtn.classList.add('bg-emerald-600', 'text-white');
-        }
-
-        // Custom Toast Notification System
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-amber-400';
-            
-            toast.className = `pointer-events-auto bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold flex items-center space-x-2.5 transition-all transform translate-y-2 opacity-0`;
-            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
-            
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Custom Confirm Dialog Modal
-        function showCustomConfirm(title, text, onConfirm) {
-            document.getElementById('confirmModalTitle').innerText = title;
-            document.getElementById('confirmModalText').innerText = text;
-            pendingConfirmCallback = onConfirm;
-            document.getElementById('customConfirmModal').classList.remove('hidden');
-
-            document.getElementById('btnConfirmAction').onclick = () => {
-                if (pendingConfirmCallback) pendingConfirmCallback();
-                closeConfirmModal(true);
-            };
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('customConfirmModal').classList.add('hidden');
-            pendingConfirmCallback = null;
-        }
-
-        // SMART PRESET HANDLER (Synchronizes Dinding & Keramik)
-        function applyPreset(p, l, t, name, isWallOnly = false) {
-            // Set Dinding Inputs
-            document.getElementById('dindingP').value = p;
-            document.getElementById('dindingL').value = l;
-            document.getElementById('dindingT').value = t;
-
-            if (isWallOnly) {
-                setWallMode('lurus');
-            } else {
-                setWallMode('ruangan');
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+            if(activeBtn) {
+                activeBtn.className = "tab-btn bg-white text-emerald-800 font-bold py-2.5 px-2 rounded-xl shadow-sm border-2 border-emerald-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition";
             }
-
-            // Set Keramik Inputs (P and L)
-            document.getElementById('keramikP').value = p;
-            document.getElementById('keramikL').value = isWallOnly ? 0 : l;
-
-            // Trigger Recalculations
-            calculateDinding();
-            calculateKeramik();
-
-            showToast(`Preset "${name}" berhasil diterapkan ke Dinding & Keramik!`);
         }
 
-        // MODULE 1: DINDING CALCULATOR LOGIC
-        function setWallMode(mode) {
-            activeWallMode = mode;
-            const btnRuangan = document.getElementById('btnWallRuangan');
-            const btnLurus = document.getElementById('btnWallLurus');
-            const wrapperL = document.getElementById('wrapperDindingL');
+        function setModeDinding(mode) {
+            modeDinding = mode;
+            const colLebar = document.getElementById('colDinLebar');
+            const btnRuangan = document.getElementById('btnModeRuangan');
+            const btnLurus = document.getElementById('btnModeLurus');
 
             if (mode === 'ruangan') {
-                btnRuangan.className = "px-3 py-1.5 rounded-lg transition bg-emerald-600 text-white shadow-sm flex-1 sm:flex-none";
-                btnLurus.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex-1 sm:flex-none";
-                wrapperL.style.display = 'block';
+                colLebar.classList.remove('hidden');
+                btnRuangan.className = "px-2.5 py-1 rounded-md bg-emerald-600 text-white font-bold shadow-sm";
+                btnLurus.className = "px-2.5 py-1 rounded-md text-slate-600";
             } else {
-                btnLurus.className = "px-3 py-1.5 rounded-lg transition bg-emerald-600 text-white shadow-sm flex-1 sm:flex-none";
-                btnRuangan.className = "px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex-1 sm:flex-none";
-                wrapperL.style.display = 'none';
+                colLebar.classList.add('hidden');
+                btnLurus.className = "px-2.5 py-1 rounded-md bg-emerald-600 text-white font-bold shadow-sm";
+                btnRuangan.className = "px-2.5 py-1 rounded-md text-slate-600";
             }
-            calculateDinding();
+            calcDinding();
         }
 
-        let currentDindingItems = [];
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function calculateDinding() {
-            const p = parseFloat(document.getElementById('dindingP').value) || 0;
-            const l = activeWallMode === 'ruangan' ? (parseFloat(document.getElementById('dindingL').value) || 0) : 0;
-            const t = parseFloat(document.getElementById('dindingT').value) || 0;
-            const tebal = document.getElementById('dindingTebal').value; // '7.5' or '10'
-            const pintu = parseInt(document.getElementById('dindingPintu').value) || 0;
-            const jendela = parseInt(document.getElementById('dindingJendela').value) || 0;
-
-            // Gross Area
-            let grossArea = 0;
-            if (activeWallMode === 'ruangan') {
-                grossArea = 2 * (p + l) * t;
-            } else {
-                grossArea = p * t;
-            }
-
-            // Deductions (Pintu ≈ 1.8m², Jendela ≈ 1.2m²)
-            const deductionArea = (pintu * 1.8) + (jendela * 1.2);
-            const netArea = Math.max(0, grossArea - deductionArea);
-
-            document.getElementById('dindingNetArea').innerText = `Luas Bersih: ${netArea.toFixed(1)} m²`;
-
-            currentDindingItems = [];
-            let subtotal = 0;
-
-            if (netArea > 0) {
-                // Hebel calculation
-                // 1m² wall needs ~8.33 pcs
-                const pcsHebel = Math.ceil(netArea * 8.33);
-                let m3Hebel = 0;
-                let hebelPriceKey = 'hebel75';
-
-                if (tebal === '7.5') {
-                    m3Hebel = Math.ceil((pcsHebel / 111) * 10) / 10;
-                    hebelPriceKey = 'hebel75';
-                } else {
-                    m3Hebel = Math.ceil((pcsHebel / 83) * 10) / 10;
-                    hebelPriceKey = 'hebel100';
-                }
-
-                const priceHebel = getPrice(hebelPriceKey);
-                const itemHebelCost = m3Hebel * priceHebel;
-                subtotal += itemHebelCost;
-
-                currentDindingItems.push({
-                    name: `Bata Ringan / Hebel ${tebal} cm`,
-                    qty: m3Hebel,
-                    unit: 'm³',
-                    detail: `≈ ${pcsHebel} pcs`,
-                    price: priceHebel,
-                    total: itemHebelCost
-                });
-
-                // Thinbed (1 sak covers 10m²)
-                if (document.getElementById('chkThinbed').checked) {
-                    const sakThinbed = Math.ceil(netArea / 10);
-                    const priceThinbed = getPrice('thinbed');
-                    const costThinbed = sakThinbed * priceThinbed;
-                    subtotal += costThinbed;
-                    currentDindingItems.push({
-                        name: 'Semen Thinbed Perekat (40kg)',
-                        qty: sakThinbed,
-                        unit: 'sak',
-                        price: priceThinbed,
-                        total: costThinbed
-                    });
-                }
-
-                // Plester (2 Sisi, 1 sak covers ~3.5m² for 2 sides)
-                if (document.getElementById('chkPlester').checked) {
-                    const sakPlester = Math.ceil(netArea / 3.5);
-                    const pricePlester = getPrice('plester');
-                    const costPlester = sakPlester * pricePlester;
-                    subtotal += costPlester;
-                    currentDindingItems.push({
-                        name: 'Semen Plester (50kg)',
-                        qty: sakPlester,
-                        unit: 'sak',
-                        price: pricePlester,
-                        total: costPlester
-                    });
-                }
-
-                // Acian (2 Sisi, 1 sak covers 9m² for 2 sides)
-                if (document.getElementById('chkAcian').checked) {
-                    const sakAcian = Math.ceil(netArea / 9);
-                    const priceAcian = getPrice('acian');
-                    const costAcian = sakAcian * priceAcian;
-                    subtotal += costAcian;
-                    currentDindingItems.push({
-                        name: 'Semen Acian (40kg)',
-                        qty: sakAcian,
-                        unit: 'sak',
-                        price: priceAcian,
-                        total: costAcian
-                    });
-                }
-
-                // Cat Dinding (2 Lapis, 2 Sisi, 1 pail covers 25m² for 2 coats 2 sides)
-                if (document.getElementById('chkCat').checked) {
-                    const pailCat = Math.ceil(netArea / 25);
-                    const priceCat = getPrice('cat');
-                    const costCat = pailCat * priceCat;
-                    subtotal += costCat;
-                    currentDindingItems.push({
-                        name: 'Cat Dinding (20kg Pail)',
-                        qty: pailCat,
-                        unit: 'pail',
-                        price: priceCat,
-                        total: costCat
-                    });
-                }
-            }
-
-            // Render Results UI
-            const resultsContainer = document.getElementById('dindingResultsList');
-            resultsContainer.innerHTML = '';
-            
-            if (currentDindingItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="col-span-full text-slate-300 italic text-center py-2">Masukkan ukuran dinding di atas untuk melihat estimasi.</div>`;
-            } else {
-                currentDindingItems.forEach(item => {
-                    resultsContainer.innerHTML += `
-                        <div class="bg-emerald-950/60 p-2.5 rounded-lg border border-emerald-800/80">
-                            <div class="font-bold text-white">${item.name}</div>
-                            <div class="text-amber-300 font-extrabold text-sm mt-0.5">${item.qty} ${item.unit} ${item.detail ? '<span class="text-[10px] text-emerald-300 font-normal">(' + item.detail + ')</span>' : ''}</div>
-                            <div class="text-[10px] text-emerald-200 mt-0.5">${formatRp(item.total)}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('dindingSubtotal').innerText = formatRp(subtotal);
-        }
-
-        function addDindingToCart() {
-            if (currentDindingItems.length === 0) {
-                showToast('Masukkan ukuran dinding terlebih dahulu!', 'info');
-                return;
-            }
-            addMultipleToCart(currentDindingItems);
-            showToast('Material Dinding berhasil ditambahkan ke Penawaran!');
-        }
-
-        // MODULE 2: KERAMIK / GRANIT CALCULATOR LOGIC
-        let currentKeramikItems = [];
-
-        function calculateKeramik() {
-            const p = parseFloat(document.getElementById('keramikP').value) || 0;
-            const l = parseFloat(document.getElementById('keramikL').value) || 0;
-            const size = document.getElementById('keramikSize').value;
-
-            const baseArea = p * l;
-            // 5% waste margin
-            const areaWithWaste = baseArea * 1.05;
-
-            document.getElementById('keramikTotalArea').innerText = `Luas: ${areaWithWaste.toFixed(1)} m² (+5% Waste)`;
-
-            currentKeramikItems = [];
-            let subtotal = 0;
-
-            if (areaWithWaste > 0) {
-                // Coverage per dus based on tile size
-                let m2PerDus = 1.0;
-                let priceKey = 'keramik_30';
-                let tileName = 'Keramik';
-
-                switch(size) {
-                    case '20': m2PerDus = 1.0; priceKey = 'keramik_20'; tileName = 'Keramik 20x20 cm'; break;
-                    case '25': m2PerDus = 1.0; priceKey = 'keramik_25'; tileName = 'Keramik 25x25 cm'; break;
-                    case '30': m2PerDus = 0.99; priceKey = 'keramik_30'; tileName = 'Keramik 30x30 cm'; break;
-                    case '40': m2PerDus = 0.96; priceKey = 'keramik_40'; tileName = 'Keramik 40x40 cm'; break;
-                    case '50': m2PerDus = 1.0; priceKey = 'keramik_50'; tileName = 'Keramik 50x50 cm'; break;
-                    case '60': m2PerDus = 1.44; priceKey = 'granit_60'; tileName = 'Granit 60x60 cm'; break;
-                    case '80': m2PerDus = 1.92; priceKey = 'granit_80'; tileName = 'Granit 80x80 cm'; break;
-                    case '1560': m2PerDus = 1.08; priceKey = 'granit_1560'; tileName = 'Keramik Motif Kayu 15x60 cm'; break;
-                }
-
-                const dusNeeded = Math.ceil(areaWithWaste / m2PerDus);
-                const tilePrice = getPrice(priceKey);
-                const costTile = dusNeeded * tilePrice;
-                subtotal += costTile;
-
-                currentKeramikItems.push({
-                    name: tileName,
-                    qty: dusNeeded,
-                    unit: 'dus',
-                    price: tilePrice,
-                    total: costTile
-                });
-
-                // Semen Nat (1 kg per 10m²)
-                if (document.getElementById('chkNat').checked) {
-                    const natNeeded = Math.ceil(areaWithWaste / 10);
-                    const priceNat = getPrice('semen_nat');
-                    const costNat = natNeeded * priceNat;
-                    subtotal += costNat;
-
-                    currentKeramikItems.push({
-                        name: 'Semen Nat Keramik (1kg)',
-                        qty: natNeeded,
-                        unit: 'bungkus',
-                        price: priceNat,
-                        total: costNat
-                    });
-                }
-
-                // Mortar Perekat Keramik (1 sak covers 6m²)
-                if (document.getElementById('chkPerekatKeramik').checked) {
-                    const perekatNeeded = Math.ceil(areaWithWaste / 6);
-                    const pricePerekat = getPrice('semen_perekat_keramik');
-                    const costPerekat = perekatNeeded * pricePerekat;
-                    subtotal += costPerekat;
-
-                    currentKeramikItems.push({
-                        name: 'Mortar Perekat Keramik (40kg)',
-                        qty: perekatNeeded,
-                        unit: 'sak',
-                        price: pricePerekat,
-                        total: costPerekat
-                    });
-                }
-            }
-
-            // Render Results UI
-            const resultsContainer = document.getElementById('keramikResultsList');
-            resultsContainer.innerHTML = '';
-
-            if (currentKeramikItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="col-span-full text-slate-300 italic text-center py-2">Masukkan ukuran lantai di atas untuk melihat estimasi.</div>`;
-            } else {
-                currentKeramikItems.forEach(item => {
-                    resultsContainer.innerHTML += `
-                        <div class="bg-emerald-950/60 p-2.5 rounded-lg border border-emerald-800/80">
-                            <div class="font-bold text-white">${item.name}</div>
-                            <div class="text-amber-300 font-extrabold text-sm mt-0.5">${item.qty} ${item.unit}</div>
-                            <div class="text-[10px] text-emerald-200 mt-0.5">${formatRp(item.total)}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('keramikSubtotal').innerText = formatRp(subtotal);
-        }
-
-        function addKeramikToCart() {
-            if (currentKeramikItems.length === 0) {
-                showToast('Masukkan ukuran lantai terlebih dahulu!', 'info');
-                return;
-            }
-            addMultipleToCart(currentKeramikItems);
-            showToast('Material Keramik/Granit berhasil ditambahkan!');
-        }
-
-        // MODULE 3: ATAP & RANGKA CALCULATOR LOGIC
-        let currentAtapItems = [];
-
-        function calculateAtap() {
-            const p = parseFloat(document.getElementById('atapP').value) || 0;
-            const l = parseFloat(document.getElementById('atapL').value) || 0;
-            const overtek = parseFloat(document.getElementById('atapOvertek').value) || 0;
-            const sudut = parseFloat(document.getElementById('atapSudut').value) || 30;
-            const jenis = document.getElementById('atapJenis').value;
-            const nokP = parseFloat(document.getElementById('atapNok').value) || 0;
-
-            // Roof Flat Dimensions with Overtek
-            const roofP = p + (2 * overtek);
-            const roofL = l + (2 * overtek);
-            const flatArea = roofP * roofL;
-
-            // Sloped Area = Flat Area / cos(sudut in radians)
-            const rad = sudut * (Math.PI / 180);
-            const slopedArea = flatArea / Math.cos(rad);
-
-            document.getElementById('atapSlopedArea').innerText = `Luas Atap Miring: ${slopedArea.toFixed(1)} m²`;
-
-            currentAtapItems = [];
-            let subtotal = 0;
-
-            if (slopedArea > 0) {
-                let pcsPerM2 = 14;
-                let priceKey = 'genteng_keramik';
-                let gentengName = 'Genteng Keramik';
-                let unit = 'pcs';
-
-                switch(jenis) {
-                    case 'keramik': pcsPerM2 = 14; priceKey = 'genteng_keramik'; gentengName = 'Genteng Keramik'; break;
-                    case 'beton': pcsPerM2 = 11; priceKey = 'genteng_beton'; gentengName = 'Genteng Beton'; break;
-                    case 'metal': pcsPerM2 = 1.6; priceKey = 'genteng_metal'; gentengName = 'Genteng Metal Pasir'; unit = 'lembar'; break;
-                    case 'morando': pcsPerM2 = 20; priceKey = 'genteng_morando'; gentengName = 'Genteng Morando Glazur'; break;
-                    case 'tanah': pcsPerM2 = 25; priceKey = 'genteng_tanah'; gentengName = 'Genteng Sokka / Tanah'; break;
-                }
-
-                const totalGenteng = Math.ceil(slopedArea * pcsPerM2);
-                const gentengPrice = getPrice(priceKey);
-                const costGenteng = totalGenteng * gentengPrice;
-                subtotal += costGenteng;
-
-                currentAtapItems.push({
-                    name: gentengName,
-                    qty: totalGenteng,
-                    unit: unit,
-                    price: gentengPrice,
-                    total: costGenteng
-                });
-
-                // Nok Genteng (≈ 4 pcs per meter)
-                if (nokP > 0) {
-                    const totalNok = Math.ceil(nokP * 4);
-                    const nokPrice = getPrice('genteng_nok');
-                    const costNok = totalNok * nokPrice;
-                    subtotal += costNok;
-
-                    currentAtapItems.push({
-                        name: 'Genteng Nok / Kerpus',
-                        qty: totalNok,
-                        unit: 'pcs',
-                        price: nokPrice,
-                        total: costNok
-                    });
-                }
-
-                // Rangka Baja Ringan
-                if (document.getElementById('chkRangkaBaja').checked) {
-                    // Kanal C (1m² needs ~1.2m kanal C -> /6m batang)
-                    const batangKanal = Math.ceil((slopedArea * 1.2) / 6);
-                    const priceKanal = getPrice('kanal_c');
-                    const costKanal = batangKanal * priceKanal;
-                    subtotal += costKanal;
-
-                    currentAtapItems.push({
-                        name: 'Baja Ringan Kanal C75 (6m)',
-                        qty: batangKanal,
-                        unit: 'batang',
-                        price: priceKanal,
-                        total: costKanal
-                    });
-
-                    // Reng (1m² needs ~3.5m reng -> /6m batang)
-                    const batangReng = Math.ceil((slopedArea * 3.5) / 6);
-                    const priceReng = getPrice('reng');
-                    const costReng = batangReng * priceReng;
-                    subtotal += costReng;
-
-                    currentAtapItems.push({
-                        name: 'Reng Baja Ringan (6m)',
-                        qty: batangReng,
-                        unit: 'batang',
-                        price: priceReng,
-                        total: costReng
-                    });
-
-                    // Baut Roofing (1 dus = 100pcs, covers ~5m²)
-                    const dusBaut = Math.ceil(slopedArea / 5);
-                    const priceBaut = getPrice('baut_roofing');
-                    const costBaut = dusBaut * priceBaut;
-                    subtotal += costBaut;
-
-                    currentAtapItems.push({
-                        name: 'Baut Roofing (100pcs)',
-                        qty: dusBaut,
-                        unit: 'dus',
-                        price: priceBaut,
-                        total: costBaut
-                    });
-                }
-            }
-
-            // Render Results UI
-            const resultsContainer = document.getElementById('atapResultsList');
-            resultsContainer.innerHTML = '';
-
-            if (currentAtapItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="col-span-full text-slate-300 italic text-center py-2">Masukkan ukuran atap di atas untuk melihat estimasi.</div>`;
-            } else {
-                currentAtapItems.forEach(item => {
-                    resultsContainer.innerHTML += `
-                        <div class="bg-emerald-950/60 p-2.5 rounded-lg border border-emerald-800/80">
-                            <div class="font-bold text-white">${item.name}</div>
-                            <div class="text-amber-300 font-extrabold text-sm mt-0.5">${item.qty} ${item.unit}</div>
-                            <div class="text-[10px] text-emerald-200 mt-0.5">${formatRp(item.total)}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('atapSubtotal').innerText = formatRp(subtotal);
-        }
-
-        function addAtapToCart() {
-            if (currentAtapItems.length === 0) {
-                showToast('Masukkan ukuran atap terlebih dahulu!', 'info');
-                return;
-            }
-            addMultipleToCart(currentAtapItems);
-            showToast('Material Atap & Rangka berhasil ditambahkan!');
-        }
-
-        // MODULE 4: COR BETON DAK CALCULATOR LOGIC
-        let currentCorItems = [];
-
-        function calculateCor() {
-            const p = parseFloat(document.getElementById('corP').value) || 0;
-            const l = parseFloat(document.getElementById('corL').value) || 0;
-            const tebalCm = parseFloat(document.getElementById('corTebal').value) || 12;
-
-            const volM3 = p * l * (tebalCm / 100);
-
-            document.getElementById('corVolumeM3').innerText = `Volume Cor: ${volM3.toFixed(2)} m³`;
-
-            currentCorItems = [];
-            let subtotal = 0;
-
-            if (volM3 > 0) {
-                // Standard K-225 mix per m³: ~8 sak Semen 50kg, ~0.5m³ Pasir, ~0.8m³ Split
-                const sakSemen = Math.ceil(volM3 * 8);
-                const priceSemen = getPrice('semen_pc');
-                const costSemen = sakSemen * priceSemen;
-                subtotal += costSemen;
-
-                currentCorItems.push({
-                    name: 'Semen Gresik/Tiga Roda (50kg)',
-                    qty: sakSemen,
-                    unit: 'sak',
-                    price: priceSemen,
-                    total: costSemen
-                });
-
-                const m3Pasir = Math.ceil((volM3 * 0.5) * 10) / 10;
-                const pricePasir = getPrice('pasir_cor');
-                const costPasir = m3Pasir * pricePasir;
-                subtotal += costPasir;
-
-                currentCorItems.push({
-                    name: 'Pasir Cor Hitam',
-                    qty: m3Pasir,
-                    unit: 'm³',
-                    price: pricePasir,
-                    total: costPasir
-                });
-
-                const m3Split = Math.ceil((volM3 * 0.8) * 10) / 10;
-                const priceSplit = getPrice('split');
-                const costSplit = m3Split * priceSplit;
-                subtotal += costSplit;
-
-                currentCorItems.push({
-                    name: 'Batu Split Cor',
-                    qty: m3Split,
-                    unit: 'm³',
-                    price: priceSplit,
-                    total: costSplit
-                });
-
-                // Wiremesh M8 (2.1 x 5.4m = 11.34 m², effective ~9.5m² with overlap)
-                if (document.getElementById('chkWiremesh').checked) {
-                    const dakArea = p * l;
-                    const lembarWiremesh = Math.ceil(dakArea / 9.5);
-                    const priceWiremesh = getPrice('wiremesh_m8');
-                    const costWiremesh = lembarWiremesh * priceWiremesh;
-                    subtotal += costWiremesh;
-
-                    currentCorItems.push({
-                        name: 'Wiremesh M8 (2.1 x 5.4m)',
-                        qty: lembarWiremesh,
-                        unit: 'lembar',
-                        price: priceWiremesh,
-                        total: costWiremesh
-                    });
-                }
-            }
-
-            // Render Results UI
-            const resultsContainer = document.getElementById('corResultsList');
-            resultsContainer.innerHTML = '';
-
-            if (currentCorItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="col-span-full text-slate-300 italic text-center py-2">Masukkan ukuran cor dak di atas untuk melihat estimasi.</div>`;
-            } else {
-                currentCorItems.forEach(item => {
-                    resultsContainer.innerHTML += `
-                        <div class="bg-emerald-950/60 p-2.5 rounded-lg border border-emerald-800/80">
-                            <div class="font-bold text-white">${item.name}</div>
-                            <div class="text-amber-300 font-extrabold text-sm mt-0.5">${item.qty} ${item.unit}</div>
-                            <div class="text-[10px] text-emerald-200 mt-0.5">${formatRp(item.total)}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            document.getElementById('corSubtotal').innerText = formatRp(subtotal);
-        }
-
-        function addCorToCart() {
-            if (currentCorItems.length === 0) {
-                showToast('Masukkan ukuran cor dak terlebih dahulu!', 'info');
-                return;
-            }
-            addMultipleToCart(currentCorItems);
-            showToast('Material Cor Beton Dak berhasil ditambahkan!');
-        }
-
-        // ==========================================
-        // MASTER HARGA & STORE SETTINGS (SKENARIO A)
-        // ==========================================
+        // MODAL MASTER HARGA (SKENARIO A)
         function openMasterHargaModal() {
-            renderMasterPriceTable();
-            document.getElementById('masterHargaModal').classList.remove('hidden');
+            renderMasterHargaTable();
+            document.getElementById('cfgStoreName').value = storeProfile.name;
+            document.getElementById('cfgStoreDesc').value = storeProfile.desc;
+            openModal('modalSettings');
         }
 
-        function closeMasterHargaModal() {
-            document.getElementById('masterHargaModal').classList.add('hidden');
-        }
-
-        // Render Dynamic Material Price Table
-        function renderMasterPriceTable() {
-            const tbody = document.getElementById('masterPriceTableBody');
+        function renderMasterHargaTable() {
+            const tbody = document.getElementById('priceTableBody');
             tbody.innerHTML = '';
-
-            masterPrices.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-2">
-                        <input type="text" value="${item.name}" 
-                            onchange="updateMasterField(${index}, 'name', this.value)"
-                            placeholder="Nama Material"
-                            class="w-full px-2 py-1 bg-transparent border border-slate-200 rounded text-xs font-semibold text-slate-800 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-                    </td>
-                    <td class="p-2">
-                        <input type="text" value="${item.unit}" 
-                            onchange="updateMasterField(${index}, 'unit', this.value)"
-                            placeholder="Satuan"
-                            class="w-20 px-2 py-1 bg-transparent border border-slate-200 rounded text-xs text-slate-600 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-                    </td>
-                    <td class="p-2 text-right">
-                        <input type="number" value="${item.price}" 
-                            onchange="updateMasterField(${index}, 'price', this.value)"
-                            class="w-32 text-right px-2 py-1 bg-slate-50 border border-slate-300 rounded text-xs font-extrabold text-slate-800 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none">
-                    </td>
-                    <td class="p-2 text-center">
-                        <button type="button" onclick="deleteMasterRow(${index})" 
-                            class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition" title="Hapus Material">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
+            masterPrices.forEach((mat, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2">
+                            <input type="text" value="${mat.name}" onchange="updateMaterialData(${index}, 'name', this.value)" class="w-full bg-slate-50 border rounded p-1 font-semibold text-xs text-slate-800">
+                        </td>
+                        <td class="p-2">
+                            <input type="text" value="${mat.unit}" onchange="updateMaterialData(${index}, 'unit', this.value)" class="w-full bg-slate-50 border rounded p-1 text-xs text-slate-700">
+                        </td>
+                        <td class="p-2 text-right">
+                            <input type="number" value="${mat.price}" onchange="updateMaterialData(${index}, 'price', this.value)" class="w-28 text-right bg-slate-50 border rounded p-1 font-bold text-xs text-slate-900">
+                        </td>
+                        <td class="p-2 text-center">
+                            <button onclick="removeMaterialRow(${index})" class="text-red-500 hover:text-red-700 font-bold p-1 rounded" title="Hapus Material">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
         }
 
-        // Skenario A: Update Row Fields Dynamically
-        function updateMasterField(index, field, value) {
+        function updateMaterialData(index, field, value) {
             if (field === 'price') {
-                masterPrices[index].price = parseFloat(value) || 0;
+                masterPrices[index][field] = parseFloat(value) || 0;
             } else {
                 masterPrices[index][field] = value;
             }
         }
 
-        // Skenario A: Tambah Material Baru Row
         function addNewMaterialRow() {
-            masterPrices.push({
-                id: 'custom_' + Date.now(),
-                name: 'Material Baru',
-                unit: 'pcs',
-                price: 0
-            });
-            renderMasterPriceTable();
-
-            // Scroll table to bottom
-            const tableContainer = document.getElementById('masterPriceTableBody').parentElement.parentElement;
-            tableContainer.scrollTop = tableContainer.scrollHeight;
+            const newId = 'custom_' + Date.now();
+            masterPrices.push({ id: newId, name: 'Material Baru', unit: 'pcs', price: 0 });
+            renderMasterHargaTable();
         }
 
-        // Skenario A: Hapus Row Material (Uses custom confirm dialog instead of native confirm)
-        function deleteMasterRow(index) {
-            const item = masterPrices[index];
-            showCustomConfirm(
-                'Hapus Material Master',
-                `Apakah Anda yakin ingin menghapus "${item.name}" dari master harga toko?`,
-                () => {
-                    masterPrices.splice(index, 1);
-                    renderMasterPriceTable();
-                    showToast('Material berhasil dihapus dari master harga.');
-                }
-            );
+        function removeMaterialRow(index) {
+            if (confirm(`Hapus material "${masterPrices[index].name}" dari Master Harga?`)) {
+                masterPrices.splice(index, 1);
+                renderMasterHargaTable();
+            }
         }
 
-        // Save Master Settings & Profile to LocalStorage
-        function saveMasterSettings() {
-            // Read Profile Inputs
-            storeProfile.name = document.getElementById('editStoreName').value.trim() || DEFAULT_STORE_PROFILE.name;
-            storeProfile.address = document.getElementById('editStoreAddress').value.trim() || DEFAULT_STORE_PROFILE.address;
-
-            // Save to LocalStorage
-            localStorage.setItem('tb_store_profile', JSON.stringify(storeProfile));
-            localStorage.setItem('tb_master_prices', JSON.stringify(masterPrices));
-
-            // Update UI Header
-            applyStoreProfileUI();
-
-            // Recalculate Active Modules
-            calculateDinding();
-            calculateKeramik();
-            calculateAtap();
-            calculateCor();
-
-            closeMasterHargaModal();
-            showToast('Pengaturan Toko & Master Harga berhasil disimpan!');
-        }
-
-        // Reset Master Prices to Factory Default
         function resetMasterPricesToDefault() {
-            showCustomConfirm(
-                'Reset Master Harga',
-                'Apakah Anda yakin ingin mengembalikan semua harga ke pengaturan standar awal?',
-                () => {
-                    masterPrices = JSON.parse(JSON.stringify(DEFAULT_MASTER_PRICES));
-                    storeProfile = { ...DEFAULT_STORE_PROFILE };
-                    saveMasterSettings();
+            if (confirm("Kembalikan seluruh daftar harga ke standar pabrik? Data kustom akan terhapus.")) {
+                masterPrices = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+                localStorage.setItem('tb_master_prices_v2', JSON.stringify(masterPrices));
+                renderMasterHargaTable();
+                showToast("Master harga berhasil di-reset ke default!");
+            }
+        }
+
+        function saveSettings() {
+            storeProfile.name = document.getElementById('cfgStoreName').value || "TB. MAJU JAYA MAKMUR";
+            storeProfile.desc = document.getElementById('cfgStoreDesc').value || "Jl. Raya Bangunan No. 88";
+            localStorage.setItem('tb_store_profile', JSON.stringify(storeProfile));
+
+            localStorage.setItem('tb_master_prices_v2', JSON.stringify(masterPrices));
+
+            loadStoreProfile();
+            calcDinding(); calcKeramik(); calcAtap(); calcBeton(); renderCart();
+            closeModal('modalSettings');
+            showToast("Pengaturan master harga berhasil disimpan!");
+        }
+
+        // --- CALCULATIONS ---
+        let currentDinItems = [];
+        function calcDinding() {
+            const p = parseFloat(document.getElementById('dinPanjang').value) || 0;
+            const l = parseFloat(document.getElementById('dinLebar').value) || 0;
+            const t = parseFloat(document.getElementById('dinTinggi').value) || 0;
+            const tebal = document.getElementById('dinTebal').value;
+            const pintu = parseFloat(document.getElementById('dinPintu').value) || 0;
+            const jendela = parseFloat(document.getElementById('dinJendela').value) || 0;
+
+            let keliling = (modeDinding === 'ruangan') ? 2 * (p + l) : p;
+            let luasKotor = keliling * t;
+            let deduksi = (pintu * 2) + (jendela * 1.5);
+            let luasBersih = Math.max(0, luasKotor - deduksi);
+            let luasEfektif = luasBersih * 1.05;
+
+            currentDinItems = [];
+            let totalBiaya = 0;
+
+            if (luasBersih > 0) {
+                let volM3 = (tebal === '7.5') ? (luasEfektif / 10) : (luasEfektif / 8);
+                let pcsHebel = Math.ceil(volM3 * (tebal === '7.5' ? 111 : 83));
+                let priceKey = tebal === '7.5' ? 'hebel75' : 'hebel100';
+                let priceHebel = getMaterialPrice(priceKey);
+                let costHebel = Math.round(volM3 * priceHebel);
+
+                currentDinItems.push({ name: `Bata Ringan (Hebel) ${tebal}cm`, qty: `${volM3.toFixed(2)} m³ (${pcsHebel} pcs)`, price: priceHebel, total: costHebel });
+                totalBiaya += costHebel;
+
+                if (document.getElementById('chkThinbed').checked) {
+                    let sakThinbed = Math.ceil(luasEfektif / (tebal === '7.5' ? 10 : 8));
+                    let pr = getMaterialPrice('thinbed');
+                    let cost = sakThinbed * pr;
+                    currentDinItems.push({ name: `Semen Thinbed (40kg)`, qty: `${sakThinbed} Sak`, price: pr, total: cost });
+                    totalBiaya += cost;
                 }
-            );
-        }
-
-        // ==========================================
-        // CART & PENAWARAN INVOICE LOGIC
-        // ==========================================
-        function addMultipleToCart(items) {
-            items.forEach(item => {
-                const existingIndex = cartItems.findIndex(c => c.name === item.name);
-                if (existingIndex >= 0) {
-                    cartItems[existingIndex].qty += item.qty;
-                    cartItems[existingIndex].total = cartItems[existingIndex].qty * cartItems[existingIndex].price;
-                } else {
-                    cartItems.push({ ...item });
+                if (document.getElementById('chkPlester').checked) {
+                    let sakPlester = Math.ceil((luasEfektif * 2) / 20);
+                    let pr = getMaterialPrice('plester');
+                    let cost = sakPlester * pr;
+                    currentDinItems.push({ name: `Semen Plester (40kg)`, qty: `${sakPlester} Sak`, price: pr, total: cost });
+                    totalBiaya += cost;
                 }
-            });
-            saveCartToStorage();
-            updateCartCount();
-        }
-
-        function saveCartToStorage() {
-            localStorage.setItem('tb_cart_items', JSON.stringify(cartItems));
-        }
-
-        function updateCartCount() {
-            const totalItems = cartItems.reduce((acc, curr) => acc + curr.qty, 0);
-            document.getElementById('desktopCartCount').innerText = totalItems;
-            document.getElementById('mobileCartCount').innerText = totalItems;
-        }
-
-        function openCartModal() {
-            renderCartTable();
-            renderQuoteHistory();
-            document.getElementById('cartModal').classList.remove('hidden');
-        }
-
-        function closeCartModal() {
-            document.getElementById('cartModal').classList.add('hidden');
-        }
-
-        function renderCartTable() {
-            const tbody = document.getElementById('cartTableBody');
-            tbody.innerHTML = '';
-
-            if (cartItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Belum ada material yang ditambahkan ke penawaran.</td></tr>`;
-            } else {
-                cartItems.forEach((item, index) => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition";
-                    tr.innerHTML = `
-                        <td class="p-2.5 font-bold text-slate-800">${item.name}</td>
-                        <td class="p-2.5 text-center">
-                            <input type="number" value="${item.qty}" min="1" 
-                                onchange="updateCartQty(${index}, this.value)"
-                                class="w-16 text-center bg-slate-50 border border-slate-300 rounded font-bold px-1 py-0.5">
-                            <span class="text-[10px] text-slate-500">${item.unit}</span>
-                        </td>
-                        <td class="p-2.5 text-right font-medium text-slate-600">${formatRp(item.price)}</td>
-                        <td class="p-2.5 text-right font-extrabold text-slate-900">${formatRp(item.total)}</td>
-                        <td class="p-2.5 text-center no-print">
-                            <button onclick="removeCartItem(${index})" class="text-red-400 hover:text-red-600 p-1 transition" title="Hapus">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+                if (document.getElementById('chkAcian').checked) {
+                    let sakAcian = Math.ceil((luasEfektif * 2) / 20);
+                    let pr = getMaterialPrice('acian');
+                    let cost = sakAcian * pr;
+                    currentDinItems.push({ name: `Semen Acian (40kg)`, qty: `${sakAcian} Sak`, price: pr, total: cost });
+                    totalBiaya += cost;
+                }
+                if (document.getElementById('chkCat').checked) {
+                    let galonCat = Math.ceil((luasEfektif * 2) / 25);
+                    let pr = getMaterialPrice('catDinding');
+                    let cost = galonCat * pr;
+                    currentDinItems.push({ name: `Cat Dinding (5kg)`, qty: `${galonCat} Galon`, price: pr, total: cost });
+                    totalBiaya += cost;
+                }
             }
 
-            updateCartTotals();
+            document.getElementById('resDinLuas').innerText = `${luasBersih.toFixed(1)} m²`;
+            document.getElementById('resDinTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+            
+            const listEl = document.getElementById('resDinList');
+            listEl.innerHTML = currentDinItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran dinding di atas untuk melihat estimasi.</span>';
         }
 
-        function updateCartQty(index, newQty) {
-            const qty = parseInt(newQty) || 1;
-            cartItems[index].qty = qty;
-            cartItems[index].total = qty * cartItems[index].price;
-            saveCartToStorage();
-            renderCartTable();
-            updateCartCount();
+        let currentKerItems = [];
+        function calcKeramik() {
+            const p = parseFloat(document.getElementById('kerPanjang').value) || 0;
+            const l = parseFloat(document.getElementById('kerLebar').value) || 0;
+            const uk = document.getElementById('kerUkuran').value;
+
+            let luas = p * l;
+            let luasEfektif = luas * 1.05;
+            currentKerItems = [];
+            let totalBiaya = 0;
+
+            const SPECS = {
+                '20x20': { m2: 1.00, key: 'ker2020', name: 'Keramik 20x20' },
+                '25x25': { m2: 1.00, key: 'ker2525', name: 'Keramik 25x25' },
+                '30x30': { m2: 0.99, key: 'ker3030', name: 'Keramik 30x30' },
+                '40x40': { m2: 0.96, key: 'ker4040', name: 'Keramik 40x40' },
+                '50x50': { m2: 1.00, key: 'ker5050', name: 'Keramik 50x50' },
+                '60x60': { m2: 1.44, key: 'ker6060', name: 'Granit 60x60' },
+                '80x80': { m2: 1.92, key: 'ker8080', name: 'Granit 80x80' },
+                '15x60': { m2: 1.08, key: 'ker1560', name: 'Keramik Kayu 15x60' }
+            };
+
+            if (luas > 0) {
+                let spec = SPECS[uk];
+                let dus = Math.ceil(luasEfektif / spec.m2);
+                let pr = getMaterialPrice(spec.key);
+                let cost = dus * pr;
+                currentKerItems.push({ name: `${spec.name}`, qty: `${dus} Dus`, price: pr, total: cost });
+                totalBiaya += cost;
+
+                if (document.getElementById('chkKerSemenNat').checked) {
+                    let kgNat = Math.ceil(luasEfektif / 3.5);
+                    let prNat = getMaterialPrice('semenNat');
+                    let costNat = kgNat * prNat;
+                    currentKerItems.push({ name: `Semen Pengisi Nat (1kg)`, qty: `${kgNat} Kg`, price: prNat, total: costNat });
+                    totalBiaya += costNat;
+                }
+                if (document.getElementById('chkKerMortar').checked) {
+                    let sakMortar = Math.ceil(luasEfektif / 5);
+                    let prMor = getMaterialPrice('mortarKeramik');
+                    let costMor = sakMortar * prMor;
+                    currentKerItems.push({ name: `Semen Mortar Keramik (40kg)`, qty: `${sakMortar} Sak`, price: prMor, total: costMor });
+                    totalBiaya += costMor;
+                }
+            }
+
+            document.getElementById('resKerLuas').innerText = `${luas.toFixed(1)} m²`;
+            document.getElementById('resKerTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+            document.getElementById('resKerList').innerHTML = currentKerItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran lantai di atas untuk melihat estimasi.</span>';
         }
 
-        function removeCartItem(index) {
-            cartItems.splice(index, 1);
-            saveCartToStorage();
-            renderCartTable();
-            updateCartCount();
-            showToast('Item berhasil dihapus dari penawaran.');
+        let currentAtpItems = [];
+        function calcAtap() {
+            const p = parseFloat(document.getElementById('atpPanjang').value) || 0;
+            const l = parseFloat(document.getElementById('atpLebar').value) || 0;
+            const overtek = parseFloat(document.getElementById('atpOvertek').value) || 0;
+            const sudut = parseFloat(document.getElementById('atpSudut').value) || 30;
+            const jnsGtg = document.getElementById('atpJenisGenteng').value;
+            const pNok = parseFloat(document.getElementById('atpPanjangNok').value) || 0;
+
+            let luasDatar = (p + 2 * overtek) * (l + 2 * overtek);
+            let rad = sudut * (Math.PI / 180);
+            let luasMiring = luasDatar / Math.cos(rad);
+
+            currentAtpItems = [];
+            let totalBiaya = 0;
+
+            const GTG_MAP = {
+                'gtgKeramik': { factor: 14, unit: 'pcs', name: 'Genteng Keramik' },
+                'gtgBeton': { factor: 10, unit: 'pcs', name: 'Genteng Beton' },
+                'gtgMetal': { factor: 1.6, unit: 'Lbr', name: 'Genteng Metal Pasir' },
+                'gtgMorando': { factor: 18, unit: 'pcs', name: 'Genteng Morando' },
+                'gtgTanah': { factor: 25, unit: 'pcs', name: 'Genteng Tanah Liat' }
+            };
+
+            if (luasMiring > 0) {
+                let gtgSpec = GTG_MAP[jnsGtg];
+                let qtyGtg = Math.ceil(luasMiring * gtgSpec.factor);
+                let prGtg = getMaterialPrice(jnsGtg);
+                let costGtg = qtyGtg * prGtg;
+                currentAtpItems.push({ name: gtgSpec.name, qty: `${qtyGtg} ${gtgSpec.unit}`, price: prGtg, total: costGtg });
+                totalBiaya += costGtg;
+
+                if (pNok > 0) {
+                    let qtyNok = Math.ceil(pNok * 3.5);
+                    let prNok = getMaterialPrice('gtgNok');
+                    let costNok = qtyNok * prNok;
+                    currentAtpItems.push({ name: `Genteng Nok / Bubungan`, qty: `${qtyNok} pcs`, price: prNok, total: costNok });
+                    totalBiaya += costNok;
+                }
+
+                if (document.getElementById('chkAtpBajaRingan').checked) {
+                    let batC = Math.ceil(luasMiring * 0.25);
+                    let prC = getMaterialPrice('kanalC75');
+                    let costC = batC * prC;
+                    currentAtpItems.push({ name: `Baja Ringan Kanal C75 (6m)`, qty: `${batC} Btg`, price: prC, total: costC });
+                    totalBiaya += costC;
+
+                    let batReng = Math.ceil(luasMiring * 0.6);
+                    let prReng = getMaterialPrice('reng');
+                    let costReng = batReng * prReng;
+                    currentAtpItems.push({ name: `Reng Baja Ringan (6m)`, qty: `${batReng} Btg`, price: prReng, total: costReng });
+                    totalBiaya += costReng;
+
+                    let pcsRoof = Math.ceil(luasMiring * 20);
+                    let prRoof = getMaterialPrice('bautRoofing');
+                    let costRoof = pcsRoof * prRoof;
+                    currentAtpItems.push({ name: `Baut Roofing`, qty: `${pcsRoof} Pcs`, price: prRoof, total: costRoof });
+                    totalBiaya += costRoof;
+                }
+            }
+
+            document.getElementById('resAtpLuas').innerText = `${luasMiring.toFixed(1)} m²`;
+            document.getElementById('resAtpTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+            document.getElementById('resAtpList').innerHTML = currentAtpItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran atap di atas untuk melihat estimasi.</span>';
+        }
+
+        let currentBtnItems = [];
+        function calcBeton() {
+            const p = parseFloat(document.getElementById('btnPanjang').value) || 0;
+            const l = parseFloat(document.getElementById('btnLebar').value) || 0;
+            const t = (parseFloat(document.getElementById('btnTebal').value) || 0) / 100;
+
+            let volM3 = p * l * t;
+            let luasDak = p * l;
+            currentBtnItems = [];
+            let totalBiaya = 0;
+
+            if (volM3 > 0) {
+                let sakSemen = Math.ceil(volM3 * 8);
+                let prSemen = getMaterialPrice('semenPC');
+                let costSemen = sakSemen * prSemen;
+                currentBtnItems.push({ name: `Semen PC (40kg)`, qty: `${sakSemen} Sak`, price: prSemen, total: costSemen });
+                totalBiaya += costSemen;
+
+                let volPasir = (volM3 * 0.5).toFixed(1);
+                let prPasir = getMaterialPrice('pasirCor');
+                let costPasir = Math.round(volPasir * prPasir);
+                currentBtnItems.push({ name: `Pasir Cor`, qty: `${volPasir} m³`, price: prPasir, total: costPasir });
+                totalBiaya += costPasir;
+
+                let volSplit = (volM3 * 0.8).toFixed(1);
+                let prSplit = getMaterialPrice('split');
+                let costSplit = Math.round(volSplit * prSplit);
+                currentBtnItems.push({ name: `Koral / Split`, qty: `${volSplit} m³`, price: prSplit, total: costSplit });
+                totalBiaya += costSplit;
+
+                if (document.getElementById('chkBtnWiremesh').checked) {
+                    let lbrWm = Math.ceil(luasDak / 10);
+                    let prWm = getMaterialPrice('wiremeshM8');
+                    let costWm = lbrWm * prWm;
+                    currentBtnItems.push({ name: `Besi Wiremesh M8`, qty: `${lbrWm} Lbr`, price: prWm, total: costWm });
+                    totalBiaya += costWm;
+                }
+            }
+
+            document.getElementById('resBtnVol').innerText = `${volM3.toFixed(2)} m³`;
+            document.getElementById('resBtnTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+            document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
+        }
+
+        // CART & PENAWARAN
+        function addDindingToCart() {
+            if (currentDinItems.length === 0) return alert("Isi dimensi dinding terlebih dahulu!");
+            cart.push(...currentDinItems); saveCart();
+        }
+        function addKeramikToCart() {
+            if (currentKerItems.length === 0) return alert("Isi dimensi keramik terlebih dahulu!");
+            cart.push(...currentKerItems); saveCart();
+        }
+        function addAtapToCart() {
+            if (currentAtpItems.length === 0) return alert("Isi dimensi atap terlebih dahulu!");
+            cart.push(...currentAtpItems); saveCart();
+        }
+        function addBetonToCart() {
+            if (currentBtnItems.length === 0) return alert("Isi dimensi cor beton terlebih dahulu!");
+            cart.push(...currentBtnItems); saveCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('tb_cart', JSON.stringify(cart));
+            renderCart();
+            showToast("Item berhasil ditambahkan ke Penawaran!");
+        }
+
+        function deleteCartItem(idx) {
+            cart.splice(idx, 1);
+            saveCart();
         }
 
         function clearCart() {
-            if (cartItems.length === 0) return;
-            showCustomConfirm(
-                'Kosongkan Penawaran',
-                'Apakah Anda yakin ingin menghapus semua item dari daftar penawaran?',
-                () => {
-                    cartItems = [];
-                    saveCartToStorage();
-                    renderCartTable();
-                    updateCartCount();
-                    showToast('Daftar penawaran berhasil dikosongkan.');
-                }
-            );
+            if (confirm("Kosongkan daftar penawaran?")) {
+                cart = [];
+                saveCart();
+            }
         }
 
-        function updateCartTotals() {
-            const subtotal = cartItems.reduce((acc, curr) => acc + curr.total, 0);
-            const discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
-            const dp = parseFloat(document.getElementById('cartDP').value) || 0;
+        function renderCart() {
+            document.getElementById('cartBadge').innerText = cart.length;
+            const tbody = document.getElementById('cartTableBody');
+            tbody.innerHTML = '';
+            let subtotal = 0;
 
-            const grandTotal = Math.max(0, subtotal - discount);
-            const remaining = Math.max(0, grandTotal - dp);
-
-            document.getElementById('cartSubtotal').innerText = formatRp(subtotal);
-            document.getElementById('cartGrandTotal').innerText = formatRp(grandTotal);
-            document.getElementById('cartRemaining').innerText = formatRp(remaining);
-        }
-
-        // Save Quote to History
-        function saveCurrentQuoteToHistory() {
-            if (cartItems.length === 0) {
-                showToast('Daftar penawaran masih kosong!', 'info');
-                return;
+            if (cart.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator.</td></tr>`;
+            } else {
+                cart.forEach((item, idx) => {
+                    subtotal += item.total;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-2.5 font-semibold text-slate-800">${item.name}</td>
+                            <td class="p-2.5 text-center font-bold">${item.qty}</td>
+                            <td class="p-2.5 text-right">Rp ${item.price.toLocaleString('id-ID')}</td>
+                            <td class="p-2.5 text-right font-bold text-slate-900">Rp ${item.total.toLocaleString('id-ID')}</td>
+                            <td class="p-2.5 text-center no-print">
+                                <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">&times;</button>
+                            </td>
+                        </tr>
+                    `;
+                });
             }
 
-            const custName = document.getElementById('custName').value.trim() || 'Pelanggan Tanpa Nama';
-            const history = JSON.parse(localStorage.getItem('tb_quote_history') || '[]');
+            const discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
+            const dp = parseFloat(document.getElementById('cartDP').value) || 0;
+            const grandTotal = Math.max(0, subtotal - discount);
+            const sisa = Math.max(0, grandTotal - dp);
 
-            const newQuote = {
+            document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+            document.getElementById('cartGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+            document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
+        }
+
+        // RIWAYAT PENAWARAN
+        function saveHistory() {
+            const name = document.getElementById('custName').value.trim() || "Pelanggan Umum";
+            if (cart.length === 0) return alert("Daftar belanjaan masih kosong!");
+
+            const record = {
                 id: Date.now(),
-                date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-                custName: custName,
-                custPhone: document.getElementById('custPhone').value.trim(),
-                items: [...cartItems],
+                date: new Date().toLocaleDateString('id-ID'),
+                custName: name,
+                custPhone: document.getElementById('custPhone').value,
+                items: [...cart],
                 discount: parseFloat(document.getElementById('cartDiscount').value) || 0,
                 dp: parseFloat(document.getElementById('cartDP').value) || 0
             };
 
-            history.unshift(newQuote);
-            localStorage.setItem('tb_quote_history', JSON.stringify(history));
-            renderQuoteHistory();
-            showToast(`Penawaran untuk "${custName}" berhasil disimpan ke riwayat!`);
+            historyQuotes.unshift(record);
+            localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+            renderHistory();
+            showToast("Penawaran berhasil disimpan ke Riwayat!");
         }
 
-        function renderQuoteHistory() {
-            const historyContainer = document.getElementById('quoteHistoryList');
-            const history = JSON.parse(localStorage.getItem('tb_quote_history') || '[]');
-
-            historyContainer.innerHTML = '';
-
-            if (history.length === 0) {
-                historyContainer.innerHTML = `<div class="text-slate-400 italic text-[11px]">Belum ada riwayat penawaran tersimpan.</div>`;
-            } else {
-                history.forEach((q, idx) => {
-                    const subtotal = q.items.reduce((acc, c) => acc + c.total, 0) - q.discount;
-                    historyContainer.innerHTML += `
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 flex justify-between items-center text-[11px]">
-                            <div>
-                                <span class="font-bold text-slate-800">${q.custName}</span>
-                                <span class="text-slate-400 text-[10px] ml-1.5">${q.date}</span>
-                                <div class="text-emerald-700 font-semibold">${formatRp(subtotal)} (${q.items.length} item)</div>
-                            </div>
-                            <div class="flex items-center space-x-1.5">
-                                <button onclick="loadQuoteFromHistory(${q.id})" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded border border-emerald-200">
-                                    Buka
-                                </button>
-                                <button onclick="deleteQuoteFromHistory(${q.id})" class="text-red-400 hover:text-red-600 p-1">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-        }
-
-        function loadQuoteFromHistory(quoteId) {
-            const history = JSON.parse(localStorage.getItem('tb_quote_history') || '[]');
-            const quote = history.find(q => q.id === quoteId);
-
-            if (quote) {
-                cartItems = [...quote.items];
-                document.getElementById('custName').value = quote.custName;
-                document.getElementById('custPhone').value = quote.custPhone || '';
-                document.getElementById('cartDiscount').value = quote.discount || 0;
-                document.getElementById('cartDP').value = quote.dp || 0;
-
-                saveCartToStorage();
-                renderCartTable();
-                updateCartCount();
-                showToast(`Penawaran "${quote.custName}" dimuat.`);
-            }
-        }
-
-        function deleteQuoteFromHistory(quoteId) {
-            let history = JSON.parse(localStorage.getItem('tb_quote_history') || '[]');
-            history = history.filter(q => q.id !== quoteId);
-            localStorage.setItem('tb_quote_history', JSON.stringify(history));
-            renderQuoteHistory();
-            showToast('Riwayat penawaran dihapus.');
-        }
-
-        // WhatsApp Formatted Text Share
-        function shareQuoteWA() {
-            if (cartItems.length === 0) {
-                showToast('Daftar penawaran masih kosong!', 'info');
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            if (historyQuotes.length === 0) {
+                list.innerHTML = `<span class="text-slate-400 italic">Belum ada riwayat tersimpan.</span>`;
                 return;
             }
 
-            const custName = document.getElementById('custName').value.trim() || 'Pelanggan';
-            const custPhone = document.getElementById('custPhone').value.trim();
+            historyQuotes.forEach(h => {
+                let total = h.items.reduce((sum, i) => sum + i.total, 0) - h.discount;
+                list.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                        <div>
+                            <strong class="text-slate-800">${h.custName}</strong> (${h.date})
+                            <div class="text-[10px] text-slate-500">${h.items.length} item &bull; Total: Rp ${total.toLocaleString('id-ID')}</div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="loadHistory(${h.id})" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">Buka</button>
+                            <button onclick="deleteHistory(${h.id})" class="bg-red-100 hover:bg-red-200 text-red-700 text-[10px] font-bold px-2 py-1 rounded">&times;</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function loadHistory(id) {
+            const item = historyQuotes.find(h => h.id === id);
+            if (item) {
+                cart = [...item.items];
+                document.getElementById('custName').value = item.custName;
+                document.getElementById('custPhone').value = item.custPhone;
+                document.getElementById('cartDiscount').value = item.discount;
+                document.getElementById('cartDP').value = item.dp;
+                saveCart();
+            }
+        }
+
+        function deleteHistory(id) {
+            historyQuotes = historyQuotes.filter(h => h.id !== id);
+            localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+            renderHistory();
+        }
+
+        // WHATSAPP SHARE
+        function shareWhatsApp() {
+            if (cart.length === 0) return alert("Keranjang belanjaan kosong!");
+            const cust = document.getElementById('custName').value || "Pelanggan";
             const discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
             const dp = parseFloat(document.getElementById('cartDP').value) || 0;
-            const subtotal = cartItems.reduce((acc, curr) => acc + curr.total, 0);
-            const grandTotal = Math.max(0, subtotal - discount);
-            const remaining = Math.max(0, grandTotal - dp);
 
-            let text = `*PENAWARAN HARGA MATERIAL*\n`;
-            text += `*${storeProfile.name}*\n`;
-            text += `${storeProfile.address}\n`;
-            text += `-----------------------------------\n`;
-            text += `Pelanggan: *${custName}*\n`;
-            if (custPhone) text += `Catatan/WA: ${custPhone}\n`;
-            text += `-----------------------------------\n\n`;
-
-            text += `*Rincian Material:*\n`;
-            cartItems.forEach((item, i) => {
-                text += `${i+1}. *${item.name}*\n   ${item.qty} ${item.unit} x ${formatRp(item.price)} = *${formatRp(item.total)}*\n`;
+            let text = `*PENAWARAN MATERIAL - ${storeProfile.name}*\n`;
+            text += `Kepada Yth: *${cust}*\n`;
+            text += `--------------------------------------\n`;
+            
+            let subtotal = 0;
+            cart.forEach((i, idx) => {
+                subtotal += i.total;
+                text += `${idx+1}. *${i.name}*\n   Qty: ${i.qty} @ Rp ${i.price.toLocaleString('id-ID')}\n   Total: Rp ${i.total.toLocaleString('id-ID')}\n`;
             });
 
-            text += `\n-----------------------------------\n`;
-            text += `Subtotal: ${formatRp(subtotal)}\n`;
-            if (discount > 0) text += `Diskon Toko: -${formatRp(discount)}\n`;
-            text += `*GRAND TOTAL: ${formatRp(grandTotal)}*\n`;
-            if (dp > 0) text += `Uang Muka (DP): -${formatRp(dp)}\n`;
-            if (dp > 0) text += `*SISA PELUNASAN: ${formatRp(remaining)}*\n`;
-            text += `-----------------------------------\n`;
-            text += `_Terima kasih telah berbelanja di ${storeProfile.name}!_`;
+            const grandTotal = Math.max(0, subtotal - discount);
+            const sisa = Math.max(0, grandTotal - dp);
 
-            const encodedText = encodeURIComponent(text);
-            window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+            text += `--------------------------------------\n`;
+            text += `Subtotal: Rp ${subtotal.toLocaleString('id-ID')}\n`;
+            if (discount > 0) text += `Diskon: -Rp ${discount.toLocaleString('id-ID')}\n`;
+            text += `*GRAND TOTAL: Rp ${grandTotal.toLocaleString('id-ID')}*\n`;
+            if (dp > 0) text += `DP: Rp ${dp.toLocaleString('id-ID')}\nSisa Pelunasan: *Rp ${sisa.toLocaleString('id-ID')}*\n`;
+            text += `\n_Terima kasih telah berbelanja di ${storeProfile.name}!_`;
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
-
-        // Print PDF
-        function printQuotePDF() {
-            if (cartItems.length === 0) {
-                showToast('Daftar penawaran masih kosong!', 'info');
-                return;
-            }
-            window.print();
-        }
-
-        // Initialize App on Window Load
-        window.onload = function() {
-            initApp();
-        };
     </script>
 </body>
 </html>
