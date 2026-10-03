@@ -20,16 +20,19 @@
             page-break-inside: avoid;
         }
 
+        .print-show { display: none !important; }
+
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            body { background: white; color: black; }
+            .print-hide-input { display: none !important; }
+            .print-show { display: inline !important; }
+            body { background: white; color: black; padding: 0; margin: 0; }
 
             /* Pastikan pembungkus modal/wrapper tidak mengunci tinggi elemen atau overflow saat dicetak */
-            #modalCart,
-            #modalCart > div,
-            .overflow-y-auto {
+            #modalCart {
                 position: static !important;
+                display: block !important;
                 height: auto !important;
                 max-height: none !important;
                 overflow: visible !important;
@@ -39,6 +42,14 @@
                 max-width: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
+            }
+
+            #modalCart > div {
+                max-height: none !important;
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
 
             /* Mencegah baris tabel dan blok QRIS terpotong antar halaman */
@@ -415,22 +426,56 @@
                     </div>
                 </div>
 
-                <!-- TABLE DAFTAR BELANJA -->
-                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                            <tr>
-                                <th class="p-2.5">Item Material</th>
-                                <th class="p-2.5 text-center">Jumlah</th>
-                                <th class="p-2.5 text-right">Harga Satuan</th>
-                                <th class="p-2.5 text-right">Total</th>
-                                <th class="p-2.5 text-center no-print">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cartTableBody" class="divide-y divide-slate-100 font-medium">
-                            <!-- Dynamic Cart Items -->
-                        </tbody>
-                    </table>
+                <!-- AMBITION / FEATURE: PANEL TAMBAH ITEM MANUAL / CUSTOM -->
+                <div class="no-print bg-amber-50/60 border border-amber-200 rounded-xl p-3">
+                    <div class="flex items-center justify-between cursor-pointer" onclick="toggleManualItemForm()">
+                        <span class="font-bold text-xs text-amber-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus-circle text-amber-600"></i> + Tambah Material / Jasa Manual (Luar Kalkulator)
+                        </span>
+                        <span id="manualFormToggleIcon" class="text-amber-700 text-xs font-bold"><i class="fa-solid fa-chevron-down"></i></span>
+                    </div>
+                    <div id="manualItemForm" class="hidden mt-2.5 pt-2 border-t border-amber-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2">
+                        <div class="sm:col-span-5">
+                            <input type="text" id="manualItemName" placeholder="Nama Barang / Jasa (misal: Paku 7cm / Ongkir)" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="text" id="manualItemQty" placeholder="Qty (misal: 2 kg)" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <input type="number" id="manualItemPrice" placeholder="Harga Rp" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-1">
+                            <button onclick="addManualItemToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-1.5 rounded-lg shadow transition" title="Tambahkan">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE DAFTAR BELANJA DENGAN INLINE EDITING -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                    <div class="px-3 py-2 bg-slate-100 border-b border-slate-200 flex justify-between items-center no-print">
+                        <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-to-square text-emerald-600"></i> Daftar Belanja Penawaran (Dapat Di-edit Langsung)
+                        </span>
+                        <span class="text-[10px] text-slate-500 italic">*Ubah nama, qty, atau harga langsung di dalam tabel.</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2.5">Item Material</th>
+                                    <th class="p-2.5 text-center w-32">Jumlah</th>
+                                    <th class="p-2.5 text-right w-32">Harga Satuan</th>
+                                    <th class="p-2.5 text-right w-32">Total</th>
+                                    <th class="p-2.5 text-center w-12 no-print">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartTableBody" class="divide-y divide-slate-100 font-medium">
+                                <!-- Dynamic Cart Items -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- KALKULASI DISKON & DP -->
@@ -439,14 +484,32 @@
                         <span class="font-semibold text-slate-600">Subtotal Material:</span>
                         <span id="cartSubtotal" class="font-bold text-slate-900">Rp 0</span>
                     </div>
+                    
                     <div class="flex justify-between items-center text-xs gap-2 no-print">
-                        <span class="font-semibold text-slate-600">Diskon Toko (Rp):</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-semibold text-slate-600">Diskon Toko:</span>
+                            <select id="cartDiscountType" onchange="handleCartDiscountDPChange()" class="bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-bold text-slate-700 focus:outline-none">
+                                <option value="rp">Nominal (Rp)</option>
+                                <option value="percent">Persentase (%)</option>
+                            </select>
+                        </div>
                         <input type="number" id="cartDiscount" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="handleCartDiscountDPChange()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
+
                     <div class="flex justify-between items-center text-xs gap-2 no-print">
                         <span class="font-semibold text-slate-600">Uang Muka / DP (Rp):</span>
                         <input type="number" id="cartDP" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="handleCartDiscountDPChange()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
+
+                    <div id="printDiscRow" class="hidden print-show justify-between items-center text-xs">
+                        <span class="font-semibold text-slate-600">Diskon Toko:</span>
+                        <span id="printDiscountVal" class="font-bold text-slate-900">-Rp 0</span>
+                    </div>
+                    <div id="printDpRow" class="hidden print-show justify-between items-center text-xs">
+                        <span class="font-semibold text-slate-600">Uang Muka (DP):</span>
+                        <span id="printDpVal" class="font-bold text-slate-900">Rp 0</span>
+                    </div>
+
                     <div class="pt-2 border-t border-slate-300 flex justify-between items-center font-bold text-sm">
                         <span class="text-slate-900">GRAND TOTAL:</span>
                         <span id="cartGrandTotal" class="text-emerald-700 font-extrabold text-base">Rp 0</span>
@@ -487,8 +550,8 @@
 
             <div class="bg-slate-100 p-3 sm:p-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-2 no-print">
                 <div class="flex gap-1.5">
-                    <button id="btnSaveHistory" onclick="saveHistory(this)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fa-solid fa-floppy-disk"></i> <span id="btnSaveHistoryText">Simpan Arsip</span>
+                    <button onclick="saveHistory()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Arsip
                     </button>
                     <button onclick="clearCart()" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs px-3 py-2 rounded-lg transition">
                         Kosongkan Draf
@@ -688,9 +751,6 @@
         let modeDinding = 'ruangan';
         let tempQrisData = '';
 
-        // FLAG PENANDA PROSES PENYIMPANAN ARSIP
-        let isSaving = false;
-
         // INITIALIZATION
         window.addEventListener('DOMContentLoaded', () => {
             initStoreProfile();
@@ -703,6 +763,16 @@
             calcBeton();
             renderHistory();
         });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
         function initStoreProfile() {
             const savedProfile = localStorage.getItem('tb_store_profile');
@@ -778,7 +848,6 @@
             }
 
             if (!Array.isArray(drafts) || drafts.length === 0) {
-                // Migrasi draf lama jika ada
                 let oldCart = [];
                 try { oldCart = JSON.parse(localStorage.getItem('tb_cart')) || []; } catch(e){}
                 
@@ -788,6 +857,7 @@
                     custPhone: '',
                     cart: oldCart,
                     discount: 0,
+                    discountType: 'rp',
                     dp: 0,
                     updatedAt: new Date().toISOString()
                 };
@@ -822,6 +892,7 @@
                 custPhone: '',
                 cart: [],
                 discount: 0,
+                discountType: 'rp',
                 dp: 0,
                 updatedAt: new Date().toISOString()
             };
@@ -844,12 +915,12 @@
 
         function deleteActiveDraft() {
             if (drafts.length <= 1) {
-                // Jika tinggal 1 draf, reset isinya
                 const draft = getActiveDraft();
                 draft.cart = [];
                 draft.custName = "Pelanggan 1";
                 draft.custPhone = "";
                 draft.discount = 0;
+                draft.discountType = "rp";
                 draft.dp = 0;
                 delete draft.historyId;
                 saveDrafts();
@@ -901,6 +972,7 @@
             const modalName = document.getElementById('custName');
             const modalPhone = document.getElementById('custPhone');
             const cartDisc = document.getElementById('cartDiscount');
+            const cartDiscType = document.getElementById('cartDiscountType');
             const cartDP = document.getElementById('cartDP');
 
             if (topName) topName.value = draft.custName || '';
@@ -908,6 +980,7 @@
             if (modalName) modalName.value = draft.custName || '';
             if (modalPhone) modalPhone.value = draft.custPhone || '';
             if (cartDisc) cartDisc.value = draft.discount || 0;
+            if (cartDiscType) cartDiscType.value = draft.discountType || 'rp';
             if (cartDP) cartDP.value = draft.dp || 0;
 
             renderCart();
@@ -950,21 +1023,85 @@
         function handleCartDiscountDPChange() {
             const draft = getActiveDraft();
             draft.discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
+            draft.discountType = document.getElementById('cartDiscountType').value || 'rp';
             draft.dp = parseFloat(document.getElementById('cartDP').value) || 0;
             saveDrafts();
             renderCart();
         }
 
+        // PENAMBAHAN ITEM DENGAN SMART MERGING
         function addItemToActiveDraft(itemsArray) {
             const draft = getActiveDraft();
             if (!draft.cart) draft.cart = [];
-            draft.cart.push(...itemsArray);
+
+            itemsArray.forEach(newItem => {
+                const existingIndex = draft.cart.findIndex(i => i.name === newItem.name);
+                if (existingIndex !== -1) {
+                    draft.cart[existingIndex] = {
+                        ...newItem,
+                        id: draft.cart[existingIndex].id || ('item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4))
+                    };
+                } else {
+                    draft.cart.push({
+                        id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        ...newItem
+                    });
+                }
+            });
+
             draft.updatedAt = new Date().toISOString();
+            saveDrafts();
+            renderDraftSelector();
+            syncActiveDraftToUI();
+            showToast(`Item diperbarui di Penawaran (${draft.custName || 'Pelanggan'})!`);
+        }
+
+        // TAMBAH ITEM MANUAL / LUAR KALKULATOR
+        function toggleManualItemForm() {
+            const form = document.getElementById('manualItemForm');
+            const icon = document.getElementById('manualFormToggleIcon');
+            form.classList.toggle('hidden');
+            if (form.classList.contains('hidden')) {
+                icon.innerHTML = `<i class="fa-solid fa-chevron-down"></i>`;
+            } else {
+                icon.innerHTML = `<i class="fa-solid fa-chevron-up"></i>`;
+            }
+        }
+
+        function addManualItemToCart() {
+            const nameEl = document.getElementById('manualItemName');
+            const qtyEl = document.getElementById('manualItemQty');
+            const priceEl = document.getElementById('manualItemPrice');
+
+            const name = nameEl.value.trim();
+            const qty = qtyEl.value.trim() || '1 pcs';
+            const price = parseFloat(priceEl.value) || 0;
+
+            if (!name) return alert("Masukkan nama barang atau jasa!");
+
+            let qtyNum = parseFloat(qty.replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
+            let total = Math.round(qtyNum * price);
+            if (isNaN(total) || total <= 0) total = price;
+
+            const draft = getActiveDraft();
+            if (!draft.cart) draft.cart = [];
+
+            draft.cart.push({
+                id: 'manual_' + Date.now(),
+                name: name,
+                qty: qty,
+                price: price,
+                total: total
+            });
+
+            nameEl.value = '';
+            qtyEl.value = '';
+            priceEl.value = '';
 
             saveDrafts();
             renderDraftSelector();
             syncActiveDraftToUI();
-            showToast(`Item ditambahkan ke draf ${draft.custName || 'Pelanggan'}!`);
+            showToast(`"${name}" berhasil ditambahkan ke Penawaran!`);
         }
 
         function getMaterialPrice(id) {
@@ -1104,10 +1241,10 @@
                 tbody.innerHTML += `
                     <tr>
                         <td class="p-2">
-                            <input type="text" value="${mat.name}" onchange="updateMaterialData(${index}, 'name', this.value)" class="w-full bg-slate-50 border rounded p-1 font-semibold text-xs text-slate-800">
+                            <input type="text" value="${escapeHtml(mat.name)}" onchange="updateMaterialData(${index}, 'name', this.value)" class="w-full bg-slate-50 border rounded p-1 font-semibold text-xs text-slate-800">
                         </td>
                         <td class="p-2">
-                            <input type="text" value="${mat.unit}" onchange="updateMaterialData(${index}, 'unit', this.value)" class="w-full bg-slate-50 border rounded p-1 text-xs text-slate-700">
+                            <input type="text" value="${escapeHtml(mat.unit)}" onchange="updateMaterialData(${index}, 'unit', this.value)" class="w-full bg-slate-50 border rounded p-1 text-xs text-slate-700">
                         </td>
                         <td class="p-2 text-right">
                             <input type="number" value="${mat.price}" onchange="updateMaterialData(${index}, 'price', this.value)" class="w-28 text-right bg-slate-50 border rounded p-1 font-bold text-xs text-slate-900">
@@ -1184,7 +1321,7 @@
             let luasKotor = keliling * t;
             let deduksi = (pintu * 2) + (jendela * 1.5);
             let luasBersih = Math.max(0, luasKotor - deduksi);
-            let luasEfektif = luasBersih * 1.05; // Cadangan potongan 5%
+            let luasEfektif = luasBersih * 1.05;
 
             currentDinItems = [];
             let totalBiaya = 0;
@@ -1434,11 +1571,33 @@
             }
         }
 
+        function updateCartItemField(idx, field, value) {
+            const draft = getActiveDraft();
+            if (!draft.cart || !draft.cart[idx]) return;
+
+            const item = draft.cart[idx];
+            if (field === 'name') {
+                item.name = value;
+            } else if (field === 'qty') {
+                item.qty = value;
+                let qtyNum = parseFloat(String(value).replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
+                item.total = Math.round(qtyNum * (item.price || 0));
+            } else if (field === 'price') {
+                item.price = parseFloat(value) || 0;
+                let qtyNum = parseFloat(String(item.qty).replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
+                item.total = Math.round(qtyNum * item.price);
+            }
+
+            saveDrafts();
+            renderCart();
+        }
+
         function clearCart() {
             if (confirm("Kosongkan daftar penawaran pada draf pelanggan ini?")) {
                 const draft = getActiveDraft();
                 draft.cart = [];
                 draft.discount = 0;
+                draft.discountType = "rp";
                 draft.dp = 0;
                 saveDrafts();
                 renderDraftSelector();
@@ -1457,63 +1616,87 @@
             let subtotal = 0;
 
             if (cartItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator atau form manual di atas.</td></tr>`;
             } else {
                 cartItems.forEach((item, idx) => {
-                    subtotal += item.total;
+                    subtotal += (item.total || 0);
                     tbody.innerHTML += `
-                        <tr>
-                            <td class="p-2.5 font-semibold text-slate-800">${item.name}</td>
-                            <td class="p-2.5 text-center font-bold">${item.qty}</td>
-                            <td class="p-2.5 text-right">Rp ${item.price.toLocaleString('id-ID')}</td>
-                            <td class="p-2.5 text-right font-bold text-slate-900">Rp ${item.total.toLocaleString('id-ID')}</td>
-                            <td class="p-2.5 text-center no-print">
-                                <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">&times;</button>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-2">
+                                <input type="text" value="${escapeHtml(item.name)}" onchange="updateCartItemField(${idx}, 'name', this.value)" class="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-2 py-1 font-semibold text-xs text-slate-800 focus:outline-none print-hide-input">
+                                <span class="hidden print-show font-semibold text-slate-800">${escapeHtml(item.name)}</span>
+                            </td>
+                            <td class="p-2 text-center">
+                                <input type="text" value="${escapeHtml(item.qty)}" onchange="updateCartItemField(${idx}, 'qty', this.value)" class="w-full text-center bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-1.5 py-1 font-bold text-xs text-slate-800 focus:outline-none print-hide-input">
+                                <span class="hidden print-show font-bold text-slate-800">${escapeHtml(item.qty)}</span>
+                            </td>
+                            <td class="p-2 text-right">
+                                <div class="flex items-center justify-end gap-1 print-hide-input">
+                                    <span class="text-[11px] text-slate-400">Rp</span>
+                                    <input type="number" value="${item.price}" onchange="updateCartItemField(${idx}, 'price', this.value)" class="w-24 text-right bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-1.5 py-1 font-bold text-xs text-slate-800 focus:outline-none">
+                                </div>
+                                <span class="hidden print-show text-slate-800">Rp ${(item.price || 0).toLocaleString('id-ID')}</span>
+                            </td>
+                            <td class="p-2 text-right font-bold text-slate-900">
+                                Rp ${(item.total || 0).toLocaleString('id-ID')}
+                            </td>
+                            <td class="p-2 text-center no-print">
+                                <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold p-1 rounded transition" title="Hapus Item">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
                             </td>
                         </tr>
                     `;
                 });
             }
 
-            const discount = draft.discount || 0;
+            const rawDisc = draft.discount || 0;
+            const discType = draft.discountType || 'rp';
+            let discountVal = rawDisc;
+            if (discType === 'percent') {
+                discountVal = Math.round(subtotal * (rawDisc / 100));
+            }
+
             const dp = draft.dp || 0;
-            const grandTotal = Math.max(0, subtotal - discount);
+            const grandTotal = Math.max(0, subtotal - discountVal);
             const sisa = Math.max(0, grandTotal - dp);
 
             document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
             document.getElementById('cartGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
             document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
+
+            const printDiscRow = document.getElementById('printDiscRow');
+            const printDpRow = document.getElementById('printDpRow');
+            if (discountVal > 0) {
+                document.getElementById('printDiscountVal').innerText = `-Rp ${discountVal.toLocaleString('id-ID')}`;
+                printDiscRow.classList.remove('hidden');
+            } else {
+                printDiscRow.classList.add('hidden');
+            }
+            if (dp > 0) {
+                document.getElementById('printDpVal').innerText = `Rp ${dp.toLocaleString('id-ID')}`;
+                printDpRow.classList.remove('hidden');
+            } else {
+                printDpRow.classList.add('hidden');
+            }
         }
 
-        // RIWAYAT PENAWARAN FINAL (MENCEGAH DUPLIKASI SAAT KLIK BERKALI-KALI)
-        function saveHistory(btnElement) {
-            if (isSaving) return;
-
+        // RIWAYAT PENAWARAN FINAL
+        function saveHistory() {
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) return alert("Daftar belanjaan draf ini masih kosong!");
 
-            // Set flag penanda proses menyimpan berlangsung
-            isSaving = true;
-
-            const btn = btnElement || document.getElementById('btnSaveHistory');
-            const btnText = document.getElementById('btnSaveHistoryText');
-
-            // Menonaktifkan tombol & mengubah UI indikator
-            if (btn) {
-                btn.disabled = true;
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-            if (btnText) {
-                btnText.innerText = "Menyimpan...";
-            }
+            const rawDisc = draft.discount || 0;
+            const discType = draft.discountType || 'rp';
 
             const record = {
                 id: Date.now(),
                 date: new Date().toLocaleDateString('id-ID'),
                 custName: draft.custName || "Pelanggan Umum",
                 custPhone: draft.custPhone || '',
-                items: [...draft.cart],
-                discount: draft.discount || 0,
+                items: JSON.parse(JSON.stringify(draft.cart)),
+                discount: rawDisc,
+                discountType: discType,
                 dp: draft.dp || 0
             };
 
@@ -1521,18 +1704,6 @@
             localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
             renderHistory();
             showToast("Penawaran berhasil diarsip ke Riwayat!");
-
-            // Memberikan jeda singkat sebelum mengaktifkan kembali tombol
-            setTimeout(() => {
-                isSaving = false;
-                if (btn) {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-                if (btnText) {
-                    btnText.innerText = "Simpan Arsip";
-                }
-            }, 800);
         }
 
         function renderHistory() {
@@ -1544,11 +1715,15 @@
             }
 
             historyQuotes.forEach(h => {
-                let total = h.items.reduce((sum, i) => sum + i.total, 0) - h.discount;
+                let sub = h.items.reduce((sum, i) => sum + (i.total || 0), 0);
+                let disc = h.discount || 0;
+                if (h.discountType === 'percent') disc = Math.round(sub * (disc / 100));
+                let total = Math.max(0, sub - disc);
+
                 list.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
                         <div>
-                            <strong class="text-slate-800">${h.custName}</strong> (${h.date})
+                            <strong class="text-slate-800">${escapeHtml(h.custName)}</strong> (${h.date})
                             <div class="text-[10px] text-slate-500">${h.items.length} item &bull; Total: Rp ${total.toLocaleString('id-ID')}</div>
                         </div>
                         <div class="flex gap-1">
@@ -1564,15 +1739,12 @@
             const item = historyQuotes.find(h => h.id === id);
             if (!item) return;
 
-            // Pengecekan: Apakah draf dari riwayat ini sudah pernah dibuka sebelumnya?
             const existingDraft = drafts.find(d => d.historyId === id);
 
             if (existingDraft) {
-                // Jika sudah pernah dibuka, langsung alihkan ke draf tersebut
                 switchActiveDraft(existingDraft.id);
                 showToast(`Draf arsip "${item.custName}" sudah terbuka! Beralih ke draf tersebut.`);
             } else {
-                // Jika belum, buat draf baru dan tandai dengan historyId
                 const draftName = item.custName.includes('(Arsip)') ? item.custName : `${item.custName} (Arsip)`;
                 const newDraft = createNewDraft(draftName);
                 
@@ -1580,6 +1752,7 @@
                 newDraft.custPhone = item.custPhone || '';
                 newDraft.cart = JSON.parse(JSON.stringify(item.items));
                 newDraft.discount = item.discount || 0;
+                newDraft.discountType = item.discountType || 'rp';
                 newDraft.dp = item.dp || 0;
 
                 saveDrafts();
@@ -1603,7 +1776,8 @@
 
             const cust = draft.custName || "Pelanggan";
             const phoneInput = draft.custPhone || "";
-            const discount = draft.discount || 0;
+            const rawDisc = draft.discount || 0;
+            const discType = draft.discountType || 'rp';
             const dp = draft.dp || 0;
 
             let text = `*NOTA INVOICE PENAWARAN MATERIAL*\n`;
@@ -1616,16 +1790,23 @@
 
             let subtotal = 0;
             cartItems.forEach((i, idx) => {
-                subtotal += i.total;
-                text += `${idx+1}. *${i.name}*\n   Qty: ${i.qty} @ Rp ${i.price.toLocaleString('id-ID')}\n   Total: Rp ${i.total.toLocaleString('id-ID')}\n\n`;
+                subtotal += (i.total || 0);
+                text += `${idx+1}. *${i.name}*\n   Qty: ${i.qty} @ Rp ${(i.price || 0).toLocaleString('id-ID')}\n   Total: Rp ${(i.total || 0).toLocaleString('id-ID')}\n\n`;
             });
 
-            const grandTotal = Math.max(0, subtotal - discount);
+            let discountVal = rawDisc;
+            let discLabel = `Diskon Toko`;
+            if (discType === 'percent') {
+                discountVal = Math.round(subtotal * (rawDisc / 100));
+                discLabel = `Diskon Toko (${rawDisc}%)`;
+            }
+
+            const grandTotal = Math.max(0, subtotal - discountVal);
             const sisa = Math.max(0, grandTotal - dp);
 
             text += `--------------------------------------\n`;
             text += `Subtotal: Rp ${subtotal.toLocaleString('id-ID')}\n`;
-            if (discount > 0) text += `Diskon Toko: -Rp ${discount.toLocaleString('id-ID')}\n`;
+            if (discountVal > 0) text += `${discLabel}: -Rp ${discountVal.toLocaleString('id-ID')}\n`;
             text += `*GRAND TOTAL: Rp ${grandTotal.toLocaleString('id-ID')}*\n`;
             if (dp > 0) {
                 text += `Uang Muka / DP: Rp ${dp.toLocaleString('id-ID')}\n`;
