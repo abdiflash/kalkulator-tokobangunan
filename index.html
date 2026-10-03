@@ -424,7 +424,7 @@
                     </div>
                 </div>
 
-                <!-- TABLE DAFTAR BELANJA (KOLOM NOMOR/NO. DITAMBAHKAN) -->
+                <!-- TABLE DAFTAR BELANJA -->
                 <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
@@ -1013,7 +1013,7 @@
             newItems.forEach(newItem => {
                 const existingIndex = draft.cart.findIndex(i => i.name === newItem.name);
                 if (existingIndex !== -1) {
-                    draft.cart[existingIndex] = newItem; // Perbarui data item jika sudah ada di penawaran
+                    draft.cart[existingIndex] = newItem;
                 } else {
                     draft.cart.push(newItem);
                 }
@@ -1512,7 +1512,7 @@
             document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
         }
 
-        // TAMBAH ITEM KE DRAF AKTIF (DENGAN MP PROTEKSI MULTI-KLIK)
+        // TAMBAH ITEM KE DRAF AKTIF
         function addDindingToCart(btnEl) {
             if (currentDinItems.length === 0) return alert("Isi dimensi dinding terlebih dahulu!");
             addItemToActiveDraft(currentDinItems);
@@ -1563,29 +1563,6 @@
             priceEl.value = '';
         }
 
-        function updateCartItemQty(idx, newQtyStr) {
-            const draft = getActiveDraft();
-            if (draft.cart && draft.cart[idx]) {
-                draft.cart[idx].qty = newQtyStr;
-                saveDrafts();
-                renderCart();
-            }
-        }
-
-        function updateCartItemPrice(idx, newPriceVal) {
-            const draft = getActiveDraft();
-            if (draft.cart && draft.cart[idx]) {
-                const price = Math.max(0, parseFloat(newPriceVal) || 0);
-                draft.cart[idx].price = price;
-                
-                const numQty = parseFloat(draft.cart[idx].qty) || 1;
-                draft.cart[idx].total = Math.round(price * numQty);
-
-                saveDrafts();
-                renderCart();
-            }
-        }
-
         function deleteCartItem(idx) {
             const draft = getActiveDraft();
             if (draft.cart && draft.cart[idx]) {
@@ -1627,12 +1604,8 @@
                         <tr>
                             <td class="p-2.5 text-center font-bold text-slate-500">${idx + 1}</td>
                             <td class="p-2.5 font-semibold text-slate-800">${item.name}</td>
-                            <td class="p-2.5 text-center font-bold">
-                                <input type="text" value="${item.qty}" onchange="updateCartItemQty(${idx}, this.value)" class="w-full text-center bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs font-bold text-slate-800 focus:bg-white focus:outline-none">
-                            </td>
-                            <td class="p-2.5 text-right">
-                                <input type="number" value="${item.price}" min="0" onchange="updateCartItemPrice(${idx}, this.value)" class="w-24 text-right bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-xs font-bold text-slate-800 focus:bg-white focus:outline-none">
-                            </td>
+                            <td class="p-2.5 text-center font-semibold text-slate-800">${item.qty}</td>
+                            <td class="p-2.5 text-right font-semibold text-slate-800">Rp ${item.price.toLocaleString('id-ID')}</td>
                             <td class="p-2.5 text-right font-bold text-slate-900">Rp ${item.total.toLocaleString('id-ID')}</td>
                             <td class="p-2.5 text-center no-print">
                                 <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">&times;</button>
@@ -1652,7 +1625,7 @@
             document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
         }
 
-        // RIWAYAT PENAWARAN FINAL (TUMPUK DATA JIKA NAMA PELANGGAN SAMA)
+        // RIWAYAT PENAWARAN FINAL
         function saveHistory() {
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) return alert("Daftar belanjaan draf ini masih kosong!");
@@ -1671,7 +1644,6 @@
             };
 
             if (existingIndex !== -1) {
-                // Tumpuk/Timpa riwayat lama dengan data terbaru
                 historyQuotes.splice(existingIndex, 1);
                 historyQuotes.unshift(record);
                 showToast(`Riwayat untuk "${name}" diperbarui!`);
@@ -1804,25 +1776,19 @@
         // KIRIM NOTA INVOICE VIA WHATSAPP
         function shareWhatsApp() {
             const draft = getActiveDraft();
-            const cartItems = draft.cart || [];
-            if (cartItems.length === 0) return alert("Keranjang belanjaan draf ini kosong!");
-
-            const phoneInput = draft.custPhone || "";
+            if (!draft.cart || draft.cart.length === 0) return alert("Daftar penawaran masih kosong!");
+            
             const text = buildInvoiceText();
-
-            let cleanedPhone = phoneInput.replace(/[^0-9]/g, '');
-            if (cleanedPhone.startsWith('0')) {
-                cleanedPhone = '62' + cleanedPhone.slice(1);
+            let phone = (draft.custPhone || '').replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) {
+                phone = '62' + phone.slice(1);
             }
-
-            let waUrl = '';
-            if (cleanedPhone.length >= 9) {
-                waUrl = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(text)}`;
-            } else {
-                waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-            }
-
-            window.open(waUrl, '_blank');
+            
+            const url = phone 
+                ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
+                : `https://wa.me/?text=${encodeURIComponent(text)}`;
+                
+            window.open(url, '_blank');
         }
     </script>
 </body>
