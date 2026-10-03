@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengaturan Toko & Invoice WhatsApp</title>
+    <!-- Tailwind CSS CDN untuk Tampilan UI Modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen p-4 md:p-8 flex flex-col items-center justify-center">
+
+    <!-- Tombol Pemicu Modal Pengaturan (Simulasi Dashboard) -->
+    <div class="text-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-4">Aplikasi POS & Invoice Kasir Toko Bangunan</h1>
+        <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="openModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg flex items-center gap-2 transition">
+                <i class="fa-solid fa-sliders"></i> Buka Pengaturan Toko & Master Harga
+            </button>
+            <button onclick="simulasiKirimWA()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg flex items-center gap-2 transition">
+                <i class="fa-brands fa-whatsapp"></i> Simulasi Kirim Invoice WA
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL PENGATURAN TOKO & MASTER HARGA -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[92vh]">
+            
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-sliders text-emerald-400 text-xl"></i>
+                    <h2 class="font-bold text-lg md:text-xl">Pengaturan Toko & Master Harga (Skenario A)</h2>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
+                
+                <!-- CARD 1: Profil Toko & Rekening Pembayaran -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 text-emerald-700 font-bold border-b border-slate-100 pb-2">
+                        <i class="fa-solid fa-store"></i>
+                        <h3>Profil Toko (White-Label) & Pembayaran</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Toko Bangunan</label>
+                            <input type="text" id="storeName" value="TB. MAJU JAYA MAKMUR" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat & WA Toko</label>
+                            <input type="text" id="storeAddress" value="Jl. Raya Bangunan No. 88 • WA: 0812-3456-7890" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-700">
+                        </div>
+                    </div>
+
+                    <!-- PENGATURAN PEMBAYARAN MANUAL -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                <i class="fa-solid fa-building-columns text-emerald-600 mr-1"></i> Daftar Rekening Bank
+                            </label>
+                            <textarea id="bankDetails" rows="4" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono text-slate-700" placeholder="Contoh: BCA: 123-456-7890 a.n. Budi"></textarea>
+                            <span class="text-[11px] text-slate-400">Rincian ini akan langsung tercantum pada pesan WhatsApp pelanggan.</span>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">
+                                <i class="fa-solid fa-qrcode text-emerald-600 mr-1"></i> Upload Gambar QRIS Toko
+                            </label>
+                            <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition relative">
+                                <input type="file" id="qrisInput" accept="image/*" onchange="previewQRIS(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                                <div id="qrisUploadPlaceholder" class="space-y-1">
+                                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                                    <p class="text-xs text-slate-600 font-medium">Klik atau drop file QRIS di sini</p>
+                                    <p class="text-[10px] text-slate-400">Format: JPG, PNG (Max 2MB)</p>
+                                </div>
+                                <div id="qrisPreviewContainer" class="hidden flex flex-col items-center gap-2">
+                                    <img id="qrisPreviewImg" src="" alt="Preview QRIS" class="h-24 object-contain rounded border border-slate-200 shadow-sm">
+                                    <span id="qrisFileName" class="text-xs text-emerald-600 font-medium truncate max-w-[200px]"></span>
+                                    <button type="button" onclick="removeQRIS(event)" class="text-xs text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i> Hapus QRIS</button>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-slate-400 block mt-1">Sistem akan menyisipkan URL Link gambar QRIS ke pesan WA.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Master Harga Material -->
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2 text-emerald-700 font-bold">
+                            <i class="fa-solid fa-tag"></i>
+                            <h3>Daftar Master Harga Material</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetDefaultMaterials()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reset Default
+                            </button>
+                            <button onclick="addMaterialRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Tambah Material Baru
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Material -->
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3">Nama Material</th>
+                                    <th class="p-3 w-32">Satuan</th>
+                                    <th class="p-3 w-44">Harga Satuan (Rp)</th>
+                                    <th class="p-3 w-16 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materialTableBody" class="divide-y divide-slate-100">
+                                <!-- Baris tabel diisi via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-100 px-6 py-4 flex justify-end border-t border-slate-200">
+                <button onclick="saveSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md flex items-center gap-2 transition">
+                    <i class="fa-solid fa-check"></i> Simpan Pengaturan
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIKA APLIKASI -->
+    <script>
+        // Data Default Material (Sesuai Gambar 1)
+        const defaultMaterials = [
+            { name: "Bata Ringan (Hebel) 7.5cm", unit: "m³", price: 650000 },
+            { name: "Bata Ringan (Hebel) 10cm", unit: "m³", price: 650000 },
+            { name: "Semen Thinbed (40kg)", unit: "sak", price: 85000 },
+            { name: "Semen Plester (40kg)", unit: "sak", price: 55000 },
+            { name: "Semen Acian (40kg)", unit: "sak", price: 65000 },
+            { name: "Cat Dinding (5kg)", unit: "gallon", price: 135000 },
+            { name: "Besi Wiremesh M8", unit: "Lbr", price: 580000 }
+        ];
+
+        // Default Rekening
+        const defaultBank = "BCA: 123-456-7890 a.n. Budi\nMandiri: 098-765-4321 a.n. Budi";
+        let currentQrisUrl = "https://tb-majujaya.com/uploads/qris-toko.png"; // Simulasi URL gambar terupload
+
+        // Inisialisasi saat Halaman Dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSettings();
+        });
+
+        function openModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function renderMaterialTable(materials) {
+            const tbody = document.getElementById("materialTableBody");
+            tbody.innerHTML = "";
+
+            materials.forEach((item, index) => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-2">
+                        <input type="text" value="${item.name}" class="mat-name w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="p-2">
+                        <input type="text" value="${item.unit}" class="mat-unit w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="p-2">
+                        <input type="number" value="${item.price}" class="mat-price w-full border border-slate-300 rounded px-2 py-1 text-sm font-semibold text-slate-700 focus:ring-1 focus:ring-emerald-500 outline-none">
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteMaterialRow(this)" class="text-rose-500 hover:text-rose-700 p-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addMaterialRow() {
+            const tbody = document.getElementById("materialTableBody");
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-50/80 transition";
+            tr.innerHTML = `
+                <td class="p-2"><input type="text" placeholder="Nama Material" class="mat-name w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-emerald-500 outline-none"></td>
+                <td class="p-2"><input type="text" placeholder="Satuan" class="mat-unit w-full border border-slate-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-emerald-500 outline-none"></td>
+                <td class="p-2"><input type="number" placeholder="0" class="mat-price w-full border border-slate-300 rounded px-2 py-1 text-sm font-semibold focus:ring-1 focus:ring-emerald-500 outline-none"></td>
+                <td class="p-2 text-center">
+                    <button onclick="deleteMaterialRow(this)" class="text-rose-500 hover:text-rose-700 p-1">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function deleteMaterialRow(button) {
+            button.closest("tr").remove();
+        }
+
+        function resetDefaultMaterials() {
+            if (confirm("Kembalikan daftar material ke pengaturan default?")) {
+                renderMaterialTable(defaultMaterials);
+            }
+        }
+
+        // Handler Preview QRIS Upload
+        function previewQRIS(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('qrisPreviewImg').src = e.target.result;
+                    document.getElementById('qrisFileName').innerText = file.name;
+                    document.getElementById('qrisUploadPlaceholder').classList.add('hidden');
+                    document.getElementById('qrisPreviewContainer').classList.remove('hidden');
+                    
+                    // Simulasi URL yang dihasilkan setelah upload ke server
+                    currentQrisUrl = `https://tb-majujaya.com/uploads/${file.name.replace(/\s+/g, '-').toLowerCase()}`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeQRIS(e) {
+            e.stopPropagation();
+            document.getElementById('qrisInput').value = '';
+            document.getElementById('qrisPreviewImg').src = '';
+            document.getElementById('qrisUploadPlaceholder').classList.remove('hidden');
+            document.getElementById('qrisPreviewContainer').classList.add('hidden');
+            currentQrisUrl = '';
+        }
+
+        // Simpan ke LocalStorage
+        function saveSettings() {
+            const storeName = document.getElementById('storeName').value;
+            const storeAddress = document.getElementById('storeAddress').value;
+            const bankDetails = document.getElementById('bankDetails').value;
+
+            const materials = [];
+            document.querySelectorAll('#materialTableBody tr').forEach(row => {
+                const name = row.querySelector('.mat-name').value;
+                const unit = row.querySelector('.mat-unit').value;
+                const price = parseFloat(row.querySelector('.mat-price').value) || 0;
+                if (name) materials.push({ name, unit, price });
+            });
+
+            const config = { storeName, storeAddress, bankDetails, currentQrisUrl, materials };
+            localStorage.setItem('tb_config', JSON.stringify(config));
+
+            alert('✅ Pengaturan Toko & Rekening berhasil disimpan!');
+            closeModal();
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('tb_config');
+            if (saved) {
+                const config = JSON.parse(saved);
+                document.getElementById('storeName').value = config.storeName || '';
+                document.getElementById('storeAddress').value = config.storeAddress || '';
+                document.getElementById('bankDetails').value = config.bankDetails || defaultBank;
+                currentQrisUrl = config.currentQrisUrl || '';
+                renderMaterialTable(config.materials || defaultMaterials);
+            } else {
+                document.getElementById('bankDetails').value = defaultBank;
+                renderMaterialTable(defaultMaterials);
+            }
+        }
+
+        // Simulasi Generate & Kirim Pesan WA (Sesuai Gambar 2 + Rincian Pembayaran)
+        function simulasiKirimWA() {
+            const storeName = document.getElementById('storeName').value || "TB. MAJU JAYA MAKMUR";
+            const bankDetails = document.getElementById('bankDetails').value;
+            
+            // Contoh pesanan fiktif (Sesuai Gambar 2)
+            let waText = `17. *Besi Wiremesh M8*\nQty: 3 Lbr @ Rp 580.000\nTotal: Rp 1.740.000\n`;
+            waText += `------------------------------------\n`;
+            waText += `Subtotal: Rp 17.745.600\n`;
+            waText += `*GRAND TOTAL: Rp 17.745.600*\n\n`;
+
+            waText += `💳 *INFORMASI PEMBAYARAN*\n`;
+            waText += `Silakan melakukan transfer ke rekening berikut:\n`;
+            waText += `${bankDetails}\n\n`;
+
+            if (currentQrisUrl) {
+                waText += `📲 *Lihat / Scan Kode QRIS Toko:*\n`;
+                waText += `${currentQrisUrl}\n\n`;
+            }
+
+            waText += `_Mohon kirimkan bukti transfer ke WhatsApp ini setelah melakukan pembayaran._\n\n`;
+            waText += `_Terima kasih telah berbelanja di ${storeName}!_`;
+
+            // Buka WhatsApp Web / Apps
+            const targetPhone = "6281234567890";
+            const encodedUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(waText)}`;
+            
+            window.open(encodedUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
