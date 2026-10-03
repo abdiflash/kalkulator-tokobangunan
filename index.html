@@ -487,8 +487,8 @@
 
             <div class="bg-slate-100 p-3 sm:p-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-2 no-print">
                 <div class="flex gap-1.5">
-                    <button onclick="saveHistory()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Arsip
+                    <button id="btnSaveHistory" onclick="saveHistory(this)" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-floppy-disk"></i> <span id="btnSaveHistoryText">Simpan Arsip</span>
                     </button>
                     <button onclick="clearCart()" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs px-3 py-2 rounded-lg transition">
                         Kosongkan Draf
@@ -687,6 +687,9 @@
         let historyQuotes = [];
         let modeDinding = 'ruangan';
         let tempQrisData = '';
+
+        // FLAG PENANDA PROSES PENYIMPANAN ARSIP
+        let isSaving = false;
 
         // INITIALIZATION
         window.addEventListener('DOMContentLoaded', () => {
@@ -1482,10 +1485,27 @@
             document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
         }
 
-        // RIWAYAT PENAWARAN FINAL
-        function saveHistory() {
+        // RIWAYAT PENAWARAN FINAL (MENCEGAH DUPLIKASI SAAT KLIK BERKALI-KALI)
+        function saveHistory(btnElement) {
+            if (isSaving) return;
+
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) return alert("Daftar belanjaan draf ini masih kosong!");
+
+            // Set flag penanda proses menyimpan berlangsung
+            isSaving = true;
+
+            const btn = btnElement || document.getElementById('btnSaveHistory');
+            const btnText = document.getElementById('btnSaveHistoryText');
+
+            // Menonaktifkan tombol & mengubah UI indikator
+            if (btn) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            if (btnText) {
+                btnText.innerText = "Menyimpan...";
+            }
 
             const record = {
                 id: Date.now(),
@@ -1501,6 +1521,18 @@
             localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
             renderHistory();
             showToast("Penawaran berhasil diarsip ke Riwayat!");
+
+            // Memberikan jeda singkat sebelum mengaktifkan kembali tombol
+            setTimeout(() => {
+                isSaving = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (btnText) {
+                    btnText.innerText = "Simpan Arsip";
+                }
+            }, 800);
         }
 
         function renderHistory() {
