@@ -13,26 +13,21 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
 
-        /* Rule CSS agar kontainer QRIS & pembayaran tidak terpotong di tengah jalan */
         #paymentBoxModal,
         #dispQrisContainer {
             break-inside: avoid;
             page-break-inside: avoid;
         }
 
-        .print-show { display: none !important; }
-
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .print-hide-input { display: none !important; }
-            .print-show { display: inline !important; }
-            body { background: white; color: black; padding: 0; margin: 0; }
+            body { background: white; color: black; }
 
-            /* Pastikan pembungkus modal/wrapper tidak mengunci tinggi elemen atau overflow saat dicetak */
-            #modalCart {
+            #modalCart,
+            #modalCart > div,
+            .overflow-y-auto {
                 position: static !important;
-                display: block !important;
                 height: auto !important;
                 max-height: none !important;
                 overflow: visible !important;
@@ -44,20 +39,18 @@
                 margin: 0 !important;
             }
 
-            #modalCart > div {
-                max-height: none !important;
-                box-shadow: none !important;
-                border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-
-            /* Mencegah baris tabel dan blok QRIS terpotong antar halaman */
             #paymentBoxModal,
             #dispQrisContainer,
             tr {
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
+            }
+
+            .cart-input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                box-shadow: none !important;
             }
         }
     </style>
@@ -83,7 +76,7 @@
             
             <div class="flex items-center space-x-2">
                 <button onclick="openMasterHargaModal()" class="bg-emerald-800 hover:bg-emerald-700 text-xs text-emerald-100 font-semibold px-3 py-2 rounded-lg border border-emerald-700 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-sliders text-amber-300"></i> Master Harga & Toko
+                    <i class="fa-solid fa-sliders text-amber-300"></i> Pengaturan Toko & Master Harga
                 </button>
                 <button onclick="openModal('modalCart')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg shadow transition flex items-center gap-2 relative">
                     <i class="fa-solid fa-cart-shopping text-sm"></i> Penawaran
@@ -104,7 +97,10 @@
                         <i class="fa-solid fa-users-gear text-base"></i>
                     </div>
                     <div class="flex-1">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Draf Pelanggan Aktif</label>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Draf Pelanggan Aktif</label>
+                            <span id="draftTimeIndicator" class="text-[10px] text-slate-400 font-medium"></span>
+                        </div>
                         <select id="activeDraftSelect" onchange="switchActiveDraft(this.value)" class="w-full font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                             <!-- Populated dynamically -->
                         </select>
@@ -121,8 +117,11 @@
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button onclick="createNewDraft()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    <button onclick="createNewDraft()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow transition flex items-center gap-1.5" title="Buat Draf Baru">
                         <i class="fa-solid fa-plus"></i> Draf Baru
+                    </button>
+                    <button onclick="duplicateActiveDraft()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs px-2.5 py-2 rounded-lg border border-amber-300 transition" title="Duplikat Draf Aktif">
+                        <i class="fa-solid fa-copy"></i>
                     </button>
                     <button onclick="deleteActiveDraft()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-2.5 py-2 rounded-lg border border-red-200 transition" title="Hapus Draf Ini">
                         <i class="fa-solid fa-trash-can"></i>
@@ -395,9 +394,9 @@
 
     </main>
 
-    <!-- MODAL POPUP: PENAWARAN & STRUK INVOICE -->
+    <!-- MODAL POPUP: PENAWARAN & STRUK INVOICE (DENGAN KERANJANG INTERAKTIF & RIWAYAT) -->
     <div id="modalCart" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
             <div class="bg-slate-900 text-white p-4 flex justify-between items-center no-print">
                 <h3 class="font-bold text-base flex items-center gap-2">
                     <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i> Struk & Proforma Invoice Penawaran
@@ -426,46 +425,22 @@
                     </div>
                 </div>
 
-                <!-- AMBITION / FEATURE: PANEL TAMBAH ITEM MANUAL / CUSTOM -->
-                <div class="no-print bg-amber-50/60 border border-amber-200 rounded-xl p-3">
-                    <div class="flex items-center justify-between cursor-pointer" onclick="toggleManualItemForm()">
-                        <span class="font-bold text-xs text-amber-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus-circle text-amber-600"></i> + Tambah Material / Jasa Manual (Luar Kalkulator)
+                <!-- TABEL DAFTAR BELANJA KERANJANG INTERAKTIF -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-slate-100 p-2.5 flex justify-between items-center border-b border-slate-200 no-print">
+                        <span class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-cart-flatbed text-emerald-600"></i> Rincian Belanja Draf Pelanggan
                         </span>
-                        <span id="manualFormToggleIcon" class="text-amber-700 text-xs font-bold"><i class="fa-solid fa-chevron-down"></i></span>
-                    </div>
-                    <div id="manualItemForm" class="hidden mt-2.5 pt-2 border-t border-amber-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2">
-                        <div class="sm:col-span-5">
-                            <input type="text" id="manualItemName" placeholder="Nama Barang / Jasa (misal: Paku 7cm / Ongkir)" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
-                        </div>
-                        <div class="sm:col-span-3">
-                            <input type="text" id="manualItemQty" placeholder="Qty (misal: 2 kg)" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
-                        </div>
-                        <div class="sm:col-span-3">
-                            <input type="number" id="manualItemPrice" placeholder="Harga Rp" class="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs font-semibold text-slate-900 focus:outline-none">
-                        </div>
-                        <div class="sm:col-span-1">
-                            <button onclick="addManualItemToCart()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-1.5 rounded-lg shadow transition" title="Tambahkan">
-                                <i class="fa-solid fa-check"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TABLE DAFTAR BELANJA DENGAN INLINE EDITING -->
-                <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
-                    <div class="px-3 py-2 bg-slate-100 border-b border-slate-200 flex justify-between items-center no-print">
-                        <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-pen-to-square text-emerald-600"></i> Daftar Belanja Penawaran (Dapat Di-edit Langsung)
-                        </span>
-                        <span class="text-[10px] text-slate-500 italic">*Ubah nama, qty, atau harga langsung di dalam tabel.</span>
+                        <button onclick="addCustomItemToCart()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] px-2.5 py-1 rounded-lg transition shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Tambah Material Custom
+                        </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                                 <tr>
-                                    <th class="p-2.5">Item Material</th>
-                                    <th class="p-2.5 text-center w-32">Jumlah</th>
+                                    <th class="p-2.5 min-w-[160px]">Item Material</th>
+                                    <th class="p-2.5 text-center w-32">Jumlah (Qty)</th>
                                     <th class="p-2.5 text-right w-32">Harga Satuan</th>
                                     <th class="p-2.5 text-right w-32">Total</th>
                                     <th class="p-2.5 text-center w-12 no-print">Aksi</th>
@@ -484,32 +459,14 @@
                         <span class="font-semibold text-slate-600">Subtotal Material:</span>
                         <span id="cartSubtotal" class="font-bold text-slate-900">Rp 0</span>
                     </div>
-                    
                     <div class="flex justify-between items-center text-xs gap-2 no-print">
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-semibold text-slate-600">Diskon Toko:</span>
-                            <select id="cartDiscountType" onchange="handleCartDiscountDPChange()" class="bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs font-bold text-slate-700 focus:outline-none">
-                                <option value="rp">Nominal (Rp)</option>
-                                <option value="percent">Persentase (%)</option>
-                            </select>
-                        </div>
+                        <span class="font-semibold text-slate-600">Diskon Toko (Rp):</span>
                         <input type="number" id="cartDiscount" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="handleCartDiscountDPChange()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
-
                     <div class="flex justify-between items-center text-xs gap-2 no-print">
                         <span class="font-semibold text-slate-600">Uang Muka / DP (Rp):</span>
                         <input type="number" id="cartDP" value="0" onfocus="handleFocus(this)" onblur="handleBlur(this)" oninput="handleCartDiscountDPChange()" class="w-32 bg-white border border-slate-300 rounded p-1 text-right font-bold text-xs focus:outline-none">
                     </div>
-
-                    <div id="printDiscRow" class="hidden print-show justify-between items-center text-xs">
-                        <span class="font-semibold text-slate-600">Diskon Toko:</span>
-                        <span id="printDiscountVal" class="font-bold text-slate-900">-Rp 0</span>
-                    </div>
-                    <div id="printDpRow" class="hidden print-show justify-between items-center text-xs">
-                        <span class="font-semibold text-slate-600">Uang Muka (DP):</span>
-                        <span id="printDpVal" class="font-bold text-slate-900">Rp 0</span>
-                    </div>
-
                     <div class="pt-2 border-t border-slate-300 flex justify-between items-center font-bold text-sm">
                         <span class="text-slate-900">GRAND TOTAL:</span>
                         <span id="cartGrandTotal" class="text-emerald-700 font-extrabold text-base">Rp 0</span>
@@ -536,12 +493,18 @@
                     </div>
                 </div>
 
-                <!-- PANEL RIWAYAT PENAWARAN TERPIN -->
-                <div class="no-print pt-2 border-t border-slate-200">
-                    <h4 class="font-bold text-xs text-slate-700 mb-2 flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Arsip & Riwayat Penawaran Final
-                    </h4>
-                    <div id="historyList" class="space-y-1.5 max-h-36 overflow-y-auto text-xs">
+                <!-- PANEL RIWAYAT PENAWARAN TERPIN & PENCARIAN -->
+                <div class="no-print pt-2 border-t border-slate-200 space-y-2">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <h4 class="font-bold text-xs text-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Arsip & Riwayat Penawaran Final
+                        </h4>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="historySearchInput" oninput="renderHistory()" placeholder="Cari nama / WA..." class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-800 focus:outline-none focus:border-emerald-600">
+                            <button onclick="clearAllHistory()" class="text-red-600 hover:text-red-800 text-[10px] font-bold border border-red-200 px-2 py-1 rounded bg-red-50 transition">Hapus Semua</button>
+                        </div>
+                    </div>
+                    <div id="historyList" class="space-y-1.5 max-h-40 overflow-y-auto text-xs">
                         <!-- Dynamic History Items -->
                     </div>
                 </div>
@@ -569,7 +532,7 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP: MASTER HARGA DINAMIS & PENGATURAN TOKO -->
+    <!-- MODAL POPUP: MASTER HARGA DINAMIS, PENGATURAN TOKO & BACKUP -->
     <div id="modalSettings" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
             <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
@@ -617,7 +580,7 @@
                         </div>
                     </div>
                     
-                    <!-- KOMPONEN UPLOAD FILE QRIS -->
+                    <!-- UPLOAD FILE QRIS -->
                     <div>
                         <label class="block text-slate-600 mb-1 font-semibold">Upload Gambar QRIS Toko (Dari Perangkat)</label>
                         <div id="qrisUploadArea" class="border-2 border-dashed border-emerald-300 bg-white rounded-xl p-3 text-center transition hover:bg-emerald-50">
@@ -644,7 +607,23 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-1">*Gambar QRIS disimpan secara lokal dan otomatis tampil di Nota Invoice & Struk Cetak.</p>
+                    </div>
+                </div>
+
+                <!-- BACKUP & RESTORE DATA JSON -->
+                <div class="bg-amber-50/60 p-3 rounded-xl border border-amber-200 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <strong class="text-amber-900 block text-xs">Cadangan Data Aplikasi (Backup & Restore)</strong>
+                        <span class="text-[11px] text-amber-700">Ekspor seluruh draf, master harga & riwayat penawaran ke file JSON.</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportDataJSON()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm transition flex items-center gap-1">
+                            <i class="fa-solid fa-download"></i> Ekspor JSON
+                        </button>
+                        <input type="file" id="importJsonFile" accept=".json" class="hidden" onchange="importDataJSON(event)">
+                        <button onclick="document.getElementById('importJsonFile').click()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm transition flex items-center gap-1">
+                            <i class="fa-solid fa-upload"></i> Impor JSON
+                        </button>
                     </div>
                 </div>
 
@@ -744,7 +723,6 @@
             qrisUrl: ""
         };
         
-        // MULTI-DRAFT STATE
         let drafts = [];
         let activeDraftId = null;
         let historyQuotes = [];
@@ -763,16 +741,6 @@
             calcBeton();
             renderHistory();
         });
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
 
         function initStoreProfile() {
             const savedProfile = localStorage.getItem('tb_store_profile');
@@ -804,7 +772,7 @@
                     bankHtml += `<strong>No. Rekening:</strong> ${storeProfile.bankAccount}<br>`;
                     bankHtml += `<strong>Atas Nama:</strong> ${storeProfile.bankHolder || storeProfile.name}`;
                 } else {
-                    bankHtml = `<span class="italic text-slate-400">Belum ada rekening diatur. Atur di menu Master Harga & Toko.</span>`;
+                    bankHtml = `<span class="italic text-slate-400">Belum ada rekening diatur. Atur di menu Pengaturan Toko.</span>`;
                 }
                 dispBank.innerHTML = bankHtml;
             }
@@ -834,7 +802,7 @@
             localStorage.setItem('tb_master_prices_v2', JSON.stringify(masterPrices));
         }
 
-        // SISTEM MANAGEMENT DRAF MULTI-PELANGGAN
+        // SISTEM DRAF MULTI-PELANGGAN & OTOMATIS SIMPAN
         function initDraftsAndHistory() {
             try {
                 historyQuotes = JSON.parse(localStorage.getItem('tb_history')) || [];
@@ -855,19 +823,54 @@
                     id: 'draft_' + Date.now(),
                     custName: 'Pelanggan 1',
                     custPhone: '',
-                    cart: oldCart,
+                    cart: Array.isArray(oldCart) ? normalizeCartItems(oldCart) : [],
                     discount: 0,
-                    discountType: 'rp',
                     dp: 0,
                     updatedAt: new Date().toISOString()
                 };
                 drafts = [defaultDraft];
+            } else {
+                drafts.forEach(d => {
+                    if (d.cart) d.cart = normalizeCartItems(d.cart);
+                });
             }
 
             activeDraftId = drafts[0].id;
             saveDrafts();
             renderDraftSelector();
             syncActiveDraftToUI();
+        }
+
+        // Normalisasi item keranjang agar memiliki nilai angka konsisten (qtyVal & price)
+        function normalizeCartItems(rawCart) {
+            return rawCart.map((item, idx) => {
+                let qtyNum = parseFloat(item.qtyVal);
+                if (isNaN(qtyNum)) {
+                    qtyNum = parseFloat(item.qty) || 1;
+                }
+                let unitStr = item.unit || 'pcs';
+                if (!item.unit && typeof item.qty === 'string') {
+                    if (item.qty.includes('m³')) unitStr = 'm³';
+                    else if (item.qty.includes('Sak')) unitStr = 'Sak';
+                    else if (item.qty.includes('Dus')) unitStr = 'Dus';
+                    else if (item.qty.includes('Galon')) unitStr = 'Galon';
+                    else if (item.qty.includes('Btg')) unitStr = 'Btg';
+                    else if (item.qty.includes('pcs')) unitStr = 'pcs';
+                }
+
+                const priceNum = parseFloat(item.price) || 0;
+                const totalNum = Math.round(qtyNum * priceNum);
+
+                return {
+                    id: item.id || ('item_' + Date.now() + '_' + idx),
+                    name: item.name || 'Material Bangunan',
+                    qtyVal: qtyNum,
+                    unit: unitStr,
+                    note: item.note || '',
+                    price: priceNum,
+                    total: totalNum
+                };
+            });
         }
 
         function getActiveDraft() {
@@ -892,7 +895,6 @@
                 custPhone: '',
                 cart: [],
                 discount: 0,
-                discountType: 'rp',
                 dp: 0,
                 updatedAt: new Date().toISOString()
             };
@@ -903,6 +905,23 @@
             syncActiveDraftToUI();
             showToast(`Draf baru "${newDraft.custName}" dibuat!`);
             return newDraft;
+        }
+
+        function duplicateActiveDraft() {
+            const current = getActiveDraft();
+            const newId = 'draft_' + Date.now();
+            const cloned = JSON.parse(JSON.stringify(current));
+            cloned.id = newId;
+            cloned.custName = `${current.custName || 'Pelanggan'} (Salinan)`;
+            cloned.updatedAt = new Date().toISOString();
+            delete cloned.historyId;
+
+            drafts.unshift(cloned);
+            activeDraftId = newId;
+            saveDrafts();
+            renderDraftSelector();
+            syncActiveDraftToUI();
+            showToast(`Draf berhasil diduplikat: "${cloned.custName}"`);
         }
 
         function switchActiveDraft(id) {
@@ -920,9 +939,9 @@
                 draft.custName = "Pelanggan 1";
                 draft.custPhone = "";
                 draft.discount = 0;
-                draft.discountType = "rp";
                 draft.dp = 0;
                 delete draft.historyId;
+                draft.updatedAt = new Date().toISOString();
                 saveDrafts();
                 renderDraftSelector();
                 syncActiveDraftToUI();
@@ -944,11 +963,16 @@
         }
 
         function saveDrafts() {
+            const current = drafts.find(d => d.id === activeDraftId);
+            if (current) {
+                current.updatedAt = new Date().toISOString();
+            }
             localStorage.setItem('tb_multi_drafts', JSON.stringify(drafts));
         }
 
         function renderDraftSelector() {
             const select = document.getElementById('activeDraftSelect');
+            const timeSpan = document.getElementById('draftTimeIndicator');
             if (!select) return;
 
             select.innerHTML = '';
@@ -962,6 +986,12 @@
                 option.innerText = `👤 ${name}${phoneStr} — ${count} Item Material`;
                 select.appendChild(option);
             });
+
+            const active = getActiveDraft();
+            if (timeSpan && active && active.updatedAt) {
+                const t = new Date(active.updatedAt);
+                timeSpan.innerText = `Tersimpan: ${t.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}`;
+            }
         }
 
         function syncActiveDraftToUI() {
@@ -972,7 +1002,6 @@
             const modalName = document.getElementById('custName');
             const modalPhone = document.getElementById('custPhone');
             const cartDisc = document.getElementById('cartDiscount');
-            const cartDiscType = document.getElementById('cartDiscountType');
             const cartDP = document.getElementById('cartDP');
 
             if (topName) topName.value = draft.custName || '';
@@ -980,7 +1009,6 @@
             if (modalName) modalName.value = draft.custName || '';
             if (modalPhone) modalPhone.value = draft.custPhone || '';
             if (cartDisc) cartDisc.value = draft.discount || 0;
-            if (cartDiscType) cartDiscType.value = draft.discountType || 'rp';
             if (cartDP) cartDP.value = draft.dp || 0;
 
             renderCart();
@@ -1023,85 +1051,30 @@
         function handleCartDiscountDPChange() {
             const draft = getActiveDraft();
             draft.discount = parseFloat(document.getElementById('cartDiscount').value) || 0;
-            draft.discountType = document.getElementById('cartDiscountType').value || 'rp';
             draft.dp = parseFloat(document.getElementById('cartDP').value) || 0;
             saveDrafts();
-            renderCart();
+            updateCartTotalsOnly();
         }
 
-        // PENAMBAHAN ITEM DENGAN SMART MERGING
         function addItemToActiveDraft(itemsArray) {
             const draft = getActiveDraft();
             if (!draft.cart) draft.cart = [];
 
-            itemsArray.forEach(newItem => {
-                const existingIndex = draft.cart.findIndex(i => i.name === newItem.name);
-                if (existingIndex !== -1) {
-                    draft.cart[existingIndex] = {
-                        ...newItem,
-                        id: draft.cart[existingIndex].id || ('item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4))
-                    };
-                } else {
-                    draft.cart.push({
-                        id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                        ...newItem
-                    });
-                }
-            });
+            const clonedItems = JSON.parse(JSON.stringify(itemsArray)).map((item, idx) => ({
+                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                name: item.name,
+                qtyVal: parseFloat(item.qtyVal) || 1,
+                unit: item.unit || 'pcs',
+                note: item.note || '',
+                price: parseFloat(item.price) || 0,
+                total: parseFloat(item.total) || 0
+            }));
 
-            draft.updatedAt = new Date().toISOString();
+            draft.cart.push(...clonedItems);
             saveDrafts();
             renderDraftSelector();
             syncActiveDraftToUI();
-            showToast(`Item diperbarui di Penawaran (${draft.custName || 'Pelanggan'})!`);
-        }
-
-        // TAMBAH ITEM MANUAL / LUAR KALKULATOR
-        function toggleManualItemForm() {
-            const form = document.getElementById('manualItemForm');
-            const icon = document.getElementById('manualFormToggleIcon');
-            form.classList.toggle('hidden');
-            if (form.classList.contains('hidden')) {
-                icon.innerHTML = `<i class="fa-solid fa-chevron-down"></i>`;
-            } else {
-                icon.innerHTML = `<i class="fa-solid fa-chevron-up"></i>`;
-            }
-        }
-
-        function addManualItemToCart() {
-            const nameEl = document.getElementById('manualItemName');
-            const qtyEl = document.getElementById('manualItemQty');
-            const priceEl = document.getElementById('manualItemPrice');
-
-            const name = nameEl.value.trim();
-            const qty = qtyEl.value.trim() || '1 pcs';
-            const price = parseFloat(priceEl.value) || 0;
-
-            if (!name) return alert("Masukkan nama barang atau jasa!");
-
-            let qtyNum = parseFloat(qty.replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
-            let total = Math.round(qtyNum * price);
-            if (isNaN(total) || total <= 0) total = price;
-
-            const draft = getActiveDraft();
-            if (!draft.cart) draft.cart = [];
-
-            draft.cart.push({
-                id: 'manual_' + Date.now(),
-                name: name,
-                qty: qty,
-                price: price,
-                total: total
-            });
-
-            nameEl.value = '';
-            qtyEl.value = '';
-            priceEl.value = '';
-
-            saveDrafts();
-            renderDraftSelector();
-            syncActiveDraftToUI();
-            showToast(`"${name}" berhasil ditambahkan ke Penawaran!`);
+            showToast(`Item ditambahkan ke draf ${draft.custName || 'Pelanggan'}!`);
         }
 
         function getMaterialPrice(id) {
@@ -1241,10 +1214,10 @@
                 tbody.innerHTML += `
                     <tr>
                         <td class="p-2">
-                            <input type="text" value="${escapeHtml(mat.name)}" onchange="updateMaterialData(${index}, 'name', this.value)" class="w-full bg-slate-50 border rounded p-1 font-semibold text-xs text-slate-800">
+                            <input type="text" value="${mat.name}" onchange="updateMaterialData(${index}, 'name', this.value)" class="w-full bg-slate-50 border rounded p-1 font-semibold text-xs text-slate-800">
                         </td>
                         <td class="p-2">
-                            <input type="text" value="${escapeHtml(mat.unit)}" onchange="updateMaterialData(${index}, 'unit', this.value)" class="w-full bg-slate-50 border rounded p-1 text-xs text-slate-700">
+                            <input type="text" value="${mat.unit}" onchange="updateMaterialData(${index}, 'unit', this.value)" class="w-full bg-slate-50 border rounded p-1 text-xs text-slate-700">
                         </td>
                         <td class="p-2 text-right">
                             <input type="number" value="${mat.price}" onchange="updateMaterialData(${index}, 'price', this.value)" class="w-28 text-right bg-slate-50 border rounded p-1 font-bold text-xs text-slate-900">
@@ -1306,6 +1279,45 @@
             showToast("Pengaturan toko & pembayaran berhasil disimpan!");
         }
 
+        // EKSPOR & IMPOR DATA (BACKUP / RESTORE)
+        function exportDataJSON() {
+            const data = {
+                storeProfile,
+                masterPrices,
+                drafts,
+                historyQuotes,
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Backup_TB_Bangunan_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("Data berhasil diekspor ke file JSON!");
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.storeProfile) localStorage.setItem('tb_store_profile', JSON.stringify(parsed.storeProfile));
+                    if (parsed.masterPrices) localStorage.setItem('tb_master_prices_v2', JSON.stringify(parsed.masterPrices));
+                    if (parsed.drafts) localStorage.setItem('tb_multi_drafts', JSON.stringify(parsed.drafts));
+                    if (parsed.historyQuotes) localStorage.setItem('tb_history', JSON.stringify(parsed.historyQuotes));
+                    alert("Data berhasil diimpor! Halaman akan dimuat ulang.");
+                    location.reload();
+                } catch(err) {
+                    alert("Gagal mengimpor file data. Format JSON tidak valid.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
         // --- RUMUS & KALKULASI REVISI ---
         let currentDinItems = [];
         function calcDinding() {
@@ -1328,7 +1340,7 @@
 
             if (luasBersih > 0) {
                 let tebalMeter = tebalNum / 100;
-                let volM3 = luasEfektif * tebalMeter;
+                let volM3 = parseFloat((luasEfektif * tebalMeter).toFixed(2));
 
                 let pcsPerM3 = (tebalNum === 7.5) ? 111 : 83;
                 let pcsHebel = Math.ceil(volM3 * pcsPerM3);
@@ -1338,7 +1350,9 @@
 
                 currentDinItems.push({ 
                     name: `Bata Ringan (Hebel) ${tebalStr}cm`, 
-                    qty: `${volM3.toFixed(2)} m³ (${pcsHebel} pcs)`, 
+                    qtyVal: volM3,
+                    unit: 'm³',
+                    note: `(${pcsHebel} pcs)`,
                     price: priceHebel, 
                     total: costHebel 
                 });
@@ -1348,28 +1362,28 @@
                     let sakThinbed = Math.ceil(volM3);
                     let pr = getMaterialPrice('thinbed');
                     let cost = sakThinbed * pr;
-                    currentDinItems.push({ name: `Semen Thinbed (40kg)`, qty: `${sakThinbed} Sak`, price: pr, total: cost });
+                    currentDinItems.push({ name: `Semen Thinbed (40kg)`, qtyVal: sakThinbed, unit: 'Sak', note: '', price: pr, total: cost });
                     totalBiaya += cost;
                 }
                 if (document.getElementById('chkPlester').checked) {
                     let sakPlester = Math.ceil((luasEfektif * 2) / 20);
                     let pr = getMaterialPrice('plester');
                     let cost = sakPlester * pr;
-                    currentDinItems.push({ name: `Semen Plester (40kg)`, qty: `${sakPlester} Sak`, price: pr, total: cost });
+                    currentDinItems.push({ name: `Semen Plester (40kg)`, qtyVal: sakPlester, unit: 'Sak', note: '', price: pr, total: cost });
                     totalBiaya += cost;
                 }
                 if (document.getElementById('chkAcian').checked) {
                     let sakAcian = Math.ceil((luasEfektif * 2) / 20);
                     let pr = getMaterialPrice('acian');
                     let cost = sakAcian * pr;
-                    currentDinItems.push({ name: `Semen Acian (40kg)`, qty: `${sakAcian} Sak`, price: pr, total: cost });
+                    currentDinItems.push({ name: `Semen Acian (40kg)`, qtyVal: sakAcian, unit: 'Sak', note: '', price: pr, total: cost });
                     totalBiaya += cost;
                 }
                 if (document.getElementById('chkCat').checked) {
                     let galonCat = Math.ceil((luasEfektif * 2) / 25);
                     let pr = getMaterialPrice('catDinding');
                     let cost = galonCat * pr;
-                    currentDinItems.push({ name: `Cat Dinding (5kg)`, qty: `${galonCat} Galon`, price: pr, total: cost });
+                    currentDinItems.push({ name: `Cat Dinding (5kg)`, qtyVal: galonCat, unit: 'Galon', note: '', price: pr, total: cost });
                     totalBiaya += cost;
                 }
             }
@@ -1378,7 +1392,7 @@
             document.getElementById('resDinTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
             
             const listEl = document.getElementById('resDinList');
-            listEl.innerHTML = currentDinItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran dinding di atas untuk melihat estimasi.</span>';
+            listEl.innerHTML = currentDinItems.map(i => `&bull; ${i.name}: <strong>${i.qtyVal} ${i.unit} ${i.note}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran dinding di atas untuk melihat estimasi.</span>';
         }
 
         let currentKerItems = [];
@@ -1408,28 +1422,28 @@
                 let dus = Math.ceil(luasEfektif / spec.m2);
                 let pr = getMaterialPrice(spec.key);
                 let cost = dus * pr;
-                currentKerItems.push({ name: `${spec.name}`, qty: `${dus} Dus`, price: pr, total: cost });
+                currentKerItems.push({ name: `${spec.name}`, qtyVal: dus, unit: 'Dus', note: `(${(dus * spec.m2).toFixed(2)} m²)`, price: pr, total: cost });
                 totalBiaya += cost;
 
                 if (document.getElementById('chkKerSemenNat').checked) {
                     let kgNat = Math.ceil(luasEfektif / 3.5);
                     let prNat = getMaterialPrice('semenNat');
                     let costNat = kgNat * prNat;
-                    currentKerItems.push({ name: `Semen Pengisi Nat (1kg)`, qty: `${kgNat} Kg`, price: prNat, total: costNat });
+                    currentKerItems.push({ name: `Semen Pengisi Nat (1kg)`, qtyVal: kgNat, unit: 'Kg', note: '', price: prNat, total: costNat });
                     totalBiaya += costNat;
                 }
                 if (document.getElementById('chkKerMortar').checked) {
                     let sakMortar = Math.ceil(luasEfektif / 5);
                     let prMor = getMaterialPrice('mortarKeramik');
                     let costMor = sakMortar * prMor;
-                    currentKerItems.push({ name: `Semen Mortar Keramik (40kg)`, qty: `${sakMortar} Sak`, price: prMor, total: costMor });
+                    currentKerItems.push({ name: `Semen Mortar Keramik (40kg)`, qtyVal: sakMortar, unit: 'Sak', note: '', price: prMor, total: costMor });
                     totalBiaya += costMor;
                 }
             }
 
             document.getElementById('resKerLuas').innerText = `${luas.toFixed(1)} m²`;
             document.getElementById('resKerTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
-            document.getElementById('resKerList').innerHTML = currentKerItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran lantai di atas untuk melihat estimasi.</span>';
+            document.getElementById('resKerList').innerHTML = currentKerItems.map(i => `&bull; ${i.name}: <strong>${i.qtyVal} ${i.unit} ${i.note}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran lantai di atas untuk melihat estimasi.</span>';
         }
 
         let currentAtpItems = [];
@@ -1462,14 +1476,14 @@
                 let qtyGtg = Math.ceil(luasMiring * gtgSpec.factor);
                 let prGtg = getMaterialPrice(jnsGtg);
                 let costGtg = qtyGtg * prGtg;
-                currentAtpItems.push({ name: gtgSpec.name, qty: `${qtyGtg} ${gtgSpec.unit}`, price: prGtg, total: costGtg });
+                currentAtpItems.push({ name: gtgSpec.name, qtyVal: qtyGtg, unit: gtgSpec.unit, note: '', price: prGtg, total: costGtg });
                 totalBiaya += costGtg;
 
                 if (pNok > 0) {
                     let qtyNok = Math.ceil(pNok * 3.5);
                     let prNok = getMaterialPrice('gtgNok');
                     let costNok = qtyNok * prNok;
-                    currentAtpItems.push({ name: `Genteng Nok / Bubungan`, qty: `${qtyNok} pcs`, price: prNok, total: costNok });
+                    currentAtpItems.push({ name: `Genteng Nok / Bubungan`, qtyVal: qtyNok, unit: 'pcs', note: '', price: prNok, total: costNok });
                     totalBiaya += costNok;
                 }
 
@@ -1477,26 +1491,26 @@
                     let batC = Math.ceil(luasMiring * 0.25);
                     let prC = getMaterialPrice('kanalC75');
                     let costC = batC * prC;
-                    currentAtpItems.push({ name: `Baja Ringan Kanal C75 (6m)`, qty: `${batC} Btg`, price: prC, total: costC });
+                    currentAtpItems.push({ name: `Baja Ringan Kanal C75 (6m)`, qtyVal: batC, unit: 'Btg', note: '', price: prC, total: costC });
                     totalBiaya += costC;
 
                     let batReng = Math.ceil(luasMiring * 0.6);
                     let prReng = getMaterialPrice('reng');
                     let costReng = batReng * prReng;
-                    currentAtpItems.push({ name: `Reng Baja Ringan (6m)`, qty: `${batReng} Btg`, price: prReng, total: costReng });
+                    currentAtpItems.push({ name: `Reng Baja Ringan (6m)`, qtyVal: batReng, unit: 'Btg', note: '', price: prReng, total: costReng });
                     totalBiaya += costReng;
 
                     let pcsRoof = Math.ceil(luasMiring * 20);
                     let prRoof = getMaterialPrice('bautRoofing');
                     let costRoof = pcsRoof * prRoof;
-                    currentAtpItems.push({ name: `Baut Roofing`, qty: `${pcsRoof} Pcs`, price: prRoof, total: costRoof });
+                    currentAtpItems.push({ name: `Baut Roofing`, qtyVal: pcsRoof, unit: 'Pcs', note: '', price: prRoof, total: costRoof });
                     totalBiaya += costRoof;
                 }
             }
 
             document.getElementById('resAtpLuas').innerText = `${luasMiring.toFixed(1)} m²`;
             document.getElementById('resAtpTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
-            document.getElementById('resAtpList').innerHTML = currentAtpItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran atap di atas untuk melihat estimasi.</span>';
+            document.getElementById('resAtpList').innerHTML = currentAtpItems.map(i => `&bull; ${i.name}: <strong>${i.qtyVal} ${i.unit}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran atap di atas untuk melihat estimasi.</span>';
         }
 
         let currentBtnItems = [];
@@ -1514,36 +1528,36 @@
                 let sakSemen = Math.ceil(volM3 * 8);
                 let prSemen = getMaterialPrice('semenPC');
                 let costSemen = sakSemen * prSemen;
-                currentBtnItems.push({ name: `Semen PC (40kg)`, qty: `${sakSemen} Sak`, price: prSemen, total: costSemen });
+                currentBtnItems.push({ name: `Semen PC (40kg)`, qtyVal: sakSemen, unit: 'Sak', note: '', price: prSemen, total: costSemen });
                 totalBiaya += costSemen;
 
                 let volPasir = parseFloat((volM3 * 0.5).toFixed(2));
                 let prPasir = getMaterialPrice('pasirCor');
                 let costPasir = Math.round(volPasir * prPasir);
-                currentBtnItems.push({ name: `Pasir Cor`, qty: `${volPasir} m³`, price: prPasir, total: costPasir });
+                currentBtnItems.push({ name: `Pasir Cor`, qtyVal: volPasir, unit: 'm³', note: '', price: prPasir, total: costPasir });
                 totalBiaya += costPasir;
 
                 let volSplit = parseFloat((volM3 * 0.8).toFixed(2));
                 let prSplit = getMaterialPrice('split');
                 let costSplit = Math.round(volSplit * prSplit);
-                currentBtnItems.push({ name: `Koral / Split`, qty: `${volSplit} m³`, price: prSplit, total: costSplit });
+                currentBtnItems.push({ name: `Koral / Split`, qtyVal: volSplit, unit: 'm³', note: '', price: prSplit, total: costSplit });
                 totalBiaya += costSplit;
 
                 if (document.getElementById('chkBtnWiremesh').checked) {
                     let lbrWm = Math.ceil(luasDak / 10);
                     let prWm = getMaterialPrice('wiremeshM8');
                     let costWm = lbrWm * prWm;
-                    currentBtnItems.push({ name: `Besi Wiremesh M8`, qty: `${lbrWm} Lbr`, price: prWm, total: costWm });
+                    currentBtnItems.push({ name: `Besi Wiremesh M8`, qtyVal: lbrWm, unit: 'Lbr', note: '', price: prWm, total: costWm });
                     totalBiaya += costWm;
                 }
             }
 
             document.getElementById('resBtnVol').innerText = `${volM3.toFixed(2)} m³`;
             document.getElementById('resBtnTotal').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
-            document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qty}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
+            document.getElementById('resBtnList').innerHTML = currentBtnItems.map(i => `&bull; ${i.name}: <strong>${i.qtyVal} ${i.unit}</strong> = Rp ${i.total.toLocaleString('id-ID')}`).join('<br>') || '<span class="italic text-slate-400">Masukkan ukuran cor dak di atas untuk melihat estimasi.</span>';
         }
 
-        // PENAMBAHAN ITEM MATERIAL KE DRAF AK TIF
+        // PENAMBAHAN ITEM KE KERANJANG
         function addDindingToCart() {
             if (currentDinItems.length === 0) return alert("Isi dimensi dinding terlebih dahulu!");
             addItemToActiveDraft(currentDinItems);
@@ -1561,6 +1575,45 @@
             addItemToActiveDraft(currentBtnItems);
         }
 
+        function addCustomItemToCart() {
+            const newItem = [{
+                name: 'Material Tambahan Custom',
+                qtyVal: 1,
+                unit: 'pcs',
+                note: '',
+                price: 0,
+                total: 0
+            }];
+            addItemToActiveDraft(newItem);
+            showToast("Material custom ditambahkan! Ubah nama & harga di tabel.");
+        }
+
+        // EDIT & PERBAIKAN KERANJANG BELANJA (INTERAKTIF)
+        function updateCartItem(index, field, value) {
+            const draft = getActiveDraft();
+            if (!draft.cart || !draft.cart[index]) return;
+
+            if (field === 'qtyVal') {
+                draft.cart[index].qtyVal = Math.max(0, parseFloat(value) || 0);
+            } else if (field === 'price') {
+                draft.cart[index].price = Math.max(0, parseFloat(value) || 0);
+            } else if (field === 'name') {
+                draft.cart[index].name = value;
+            } else if (field === 'unit') {
+                draft.cart[index].unit = value;
+            }
+
+            draft.cart[index].total = Math.round(draft.cart[index].qtyVal * draft.cart[index].price);
+
+            const itemTotalEl = document.getElementById(`cartItemTotal_${index}`);
+            if (itemTotalEl) {
+                itemTotalEl.innerText = `Rp ${draft.cart[index].total.toLocaleString('id-ID')}`;
+            }
+
+            saveDrafts();
+            updateCartTotalsOnly();
+        }
+
         function deleteCartItem(idx) {
             const draft = getActiveDraft();
             if (draft.cart && draft.cart[idx]) {
@@ -1571,33 +1624,11 @@
             }
         }
 
-        function updateCartItemField(idx, field, value) {
-            const draft = getActiveDraft();
-            if (!draft.cart || !draft.cart[idx]) return;
-
-            const item = draft.cart[idx];
-            if (field === 'name') {
-                item.name = value;
-            } else if (field === 'qty') {
-                item.qty = value;
-                let qtyNum = parseFloat(String(value).replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
-                item.total = Math.round(qtyNum * (item.price || 0));
-            } else if (field === 'price') {
-                item.price = parseFloat(value) || 0;
-                let qtyNum = parseFloat(String(item.qty).replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;
-                item.total = Math.round(qtyNum * item.price);
-            }
-
-            saveDrafts();
-            renderCart();
-        }
-
         function clearCart() {
             if (confirm("Kosongkan daftar penawaran pada draf pelanggan ini?")) {
                 const draft = getActiveDraft();
                 draft.cart = [];
                 draft.discount = 0;
-                draft.discountType = "rp";
                 draft.dp = 0;
                 saveDrafts();
                 renderDraftSelector();
@@ -1613,36 +1644,38 @@
             document.getElementById('cartBadge').innerText = cartItems.length;
             const tbody = document.getElementById('cartTableBody');
             tbody.innerHTML = '';
-            let subtotal = 0;
 
             if (cartItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator atau form manual di atas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada item penawaran. Tambahkan dari modul kalkulator atau klik "+ Tambah Material Custom".</td></tr>`;
             } else {
                 cartItems.forEach((item, idx) => {
-                    subtotal += (item.total || 0);
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition">
+                        <tr class="hover:bg-slate-50/80 transition">
                             <td class="p-2">
-                                <input type="text" value="${escapeHtml(item.name)}" onchange="updateCartItemField(${idx}, 'name', this.value)" class="w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-2 py-1 font-semibold text-xs text-slate-800 focus:outline-none print-hide-input">
-                                <span class="hidden print-show font-semibold text-slate-800">${escapeHtml(item.name)}</span>
+                                <input type="text" value="${item.name}" onchange="updateCartItem(${idx}, 'name', this.value)" class="w-full bg-transparent font-semibold text-slate-800 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:outline-none p-1 rounded text-xs no-print">
+                                <span class="hidden print-only font-bold">${item.name}</span>
+                                ${item.note ? `<span class="block text-[10px] text-slate-500 italic">${item.note}</span>` : ''}
                             </td>
                             <td class="p-2 text-center">
-                                <input type="text" value="${escapeHtml(item.qty)}" onchange="updateCartItemField(${idx}, 'qty', this.value)" class="w-full text-center bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-1.5 py-1 font-bold text-xs text-slate-800 focus:outline-none print-hide-input">
-                                <span class="hidden print-show font-bold text-slate-800">${escapeHtml(item.qty)}</span>
+                                <div class="flex items-center justify-center gap-1 no-print">
+                                    <input type="number" step="any" min="0" value="${item.qtyVal}" oninput="updateCartItem(${idx}, 'qtyVal', this.value)" class="w-16 text-center font-bold bg-white border border-slate-300 rounded p-1 text-xs focus:border-emerald-600 focus:outline-none">
+                                    <span class="text-[11px] font-medium text-slate-600">${item.unit}</span>
+                                </div>
+                                <span class="hidden print-only font-bold">${item.qtyVal} ${item.unit}</span>
                             </td>
                             <td class="p-2 text-right">
-                                <div class="flex items-center justify-end gap-1 print-hide-input">
-                                    <span class="text-[11px] text-slate-400">Rp</span>
-                                    <input type="number" value="${item.price}" onchange="updateCartItemField(${idx}, 'price', this.value)" class="w-24 text-right bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded px-1.5 py-1 font-bold text-xs text-slate-800 focus:outline-none">
+                                <div class="no-print flex items-center justify-end">
+                                    <span class="text-slate-400 mr-1">Rp</span>
+                                    <input type="number" min="0" value="${item.price}" oninput="updateCartItem(${idx}, 'price', this.value)" class="w-24 text-right font-medium bg-white border border-slate-300 rounded p-1 text-xs focus:border-emerald-600 focus:outline-none">
                                 </div>
-                                <span class="hidden print-show text-slate-800">Rp ${(item.price || 0).toLocaleString('id-ID')}</span>
+                                <span class="hidden print-only">Rp ${item.price.toLocaleString('id-ID')}</span>
                             </td>
-                            <td class="p-2 text-right font-bold text-slate-900">
-                                Rp ${(item.total || 0).toLocaleString('id-ID')}
+                            <td class="p-2 text-right font-bold text-slate-900" id="cartItemTotal_${idx}">
+                                Rp ${item.total.toLocaleString('id-ID')}
                             </td>
                             <td class="p-2 text-center no-print">
-                                <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold p-1 rounded transition" title="Hapus Item">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                <button onclick="deleteCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold p-1 rounded" title="Hapus Item">
+                                    <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </td>
                         </tr>
@@ -1650,53 +1683,37 @@
                 });
             }
 
-            const rawDisc = draft.discount || 0;
-            const discType = draft.discountType || 'rp';
-            let discountVal = rawDisc;
-            if (discType === 'percent') {
-                discountVal = Math.round(subtotal * (rawDisc / 100));
-            }
+            updateCartTotalsOnly();
+        }
 
-            const dp = draft.dp || 0;
-            const grandTotal = Math.max(0, subtotal - discountVal);
+        function updateCartTotalsOnly() {
+            const draft = getActiveDraft();
+            const cartItems = draft.cart || [];
+
+            let subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+            const discount = parseFloat(draft.discount) || 0;
+            const dp = parseFloat(draft.dp) || 0;
+            const grandTotal = Math.max(0, subtotal - discount);
             const sisa = Math.max(0, grandTotal - dp);
 
             document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
             document.getElementById('cartGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
             document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
-
-            const printDiscRow = document.getElementById('printDiscRow');
-            const printDpRow = document.getElementById('printDpRow');
-            if (discountVal > 0) {
-                document.getElementById('printDiscountVal').innerText = `-Rp ${discountVal.toLocaleString('id-ID')}`;
-                printDiscRow.classList.remove('hidden');
-            } else {
-                printDiscRow.classList.add('hidden');
-            }
-            if (dp > 0) {
-                document.getElementById('printDpVal').innerText = `Rp ${dp.toLocaleString('id-ID')}`;
-                printDpRow.classList.remove('hidden');
-            } else {
-                printDpRow.classList.add('hidden');
-            }
         }
 
-        // RIWAYAT PENAWARAN FINAL
+        // PENYIMPANAN & PENGELOLAAN RIWAYAT
         function saveHistory() {
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) return alert("Daftar belanjaan draf ini masih kosong!");
 
-            const rawDisc = draft.discount || 0;
-            const discType = draft.discountType || 'rp';
-
             const record = {
                 id: Date.now(),
                 date: new Date().toLocaleDateString('id-ID'),
+                time: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}),
                 custName: draft.custName || "Pelanggan Umum",
                 custPhone: draft.custPhone || '',
                 items: JSON.parse(JSON.stringify(draft.cart)),
-                discount: rawDisc,
-                discountType: discType,
+                discount: draft.discount || 0,
                 dp: draft.dp || 0
             };
 
@@ -1708,27 +1725,37 @@
 
         function renderHistory() {
             const list = document.getElementById('historyList');
+            if (!list) return;
+
+            const searchQuery = (document.getElementById('historySearchInput')?.value || '').toLowerCase();
             list.innerHTML = '';
-            if (historyQuotes.length === 0) {
-                list.innerHTML = `<span class="text-slate-400 italic">Belum ada riwayat tersimpan.</span>`;
+
+            const filtered = historyQuotes.filter(h => 
+                (h.custName || '').toLowerCase().includes(searchQuery) || 
+                (h.custPhone || '').includes(searchQuery)
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<span class="text-slate-400 italic">Belum ada riwayat tersimpan yang cocok.</span>`;
                 return;
             }
 
-            historyQuotes.forEach(h => {
+            filtered.forEach(h => {
                 let sub = h.items.reduce((sum, i) => sum + (i.total || 0), 0);
-                let disc = h.discount || 0;
-                if (h.discountType === 'percent') disc = Math.round(sub * (disc / 100));
-                let total = Math.max(0, sub - disc);
-
+                let total = Math.max(0, sub - (h.discount || 0));
                 list.innerHTML += `
-                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="flex flex-wrap justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm hover:border-emerald-300 transition gap-2">
                         <div>
-                            <strong class="text-slate-800">${escapeHtml(h.custName)}</strong> (${h.date})
-                            <div class="text-[10px] text-slate-500">${h.items.length} item &bull; Total: Rp ${total.toLocaleString('id-ID')}</div>
+                            <strong class="text-slate-800 text-xs">${h.custName}</strong> ${h.custPhone ? `<span class="text-slate-500">(${h.custPhone})</span>` : ''}
+                            <div class="text-[10px] text-slate-500">${h.date} ${h.time || ''} &bull; ${h.items.length} item &bull; <strong>Rp ${total.toLocaleString('id-ID')}</strong></div>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="loadHistoryToNewDraft(${h.id})" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">Buka di Draf</button>
-                            <button onclick="deleteHistory(${h.id})" class="bg-red-100 hover:bg-red-200 text-red-700 text-[10px] font-bold px-2 py-1 rounded">&times;</button>
+                            <button onclick="loadHistoryToNewDraft(${h.id})" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded transition flex items-center gap-1">
+                                <i class="fa-solid fa-folder-open"></i> Buka Draf
+                            </button>
+                            <button onclick="deleteHistory(${h.id})" class="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-1 rounded transition" title="Hapus Riwayat">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -1743,16 +1770,15 @@
 
             if (existingDraft) {
                 switchActiveDraft(existingDraft.id);
-                showToast(`Draf arsip "${item.custName}" sudah terbuka! Beralih ke draf tersebut.`);
+                showToast(`Draf arsip "${item.custName}" sudah terbuka!`);
             } else {
                 const draftName = item.custName.includes('(Arsip)') ? item.custName : `${item.custName} (Arsip)`;
                 const newDraft = createNewDraft(draftName);
                 
                 newDraft.historyId = item.id;
                 newDraft.custPhone = item.custPhone || '';
-                newDraft.cart = JSON.parse(JSON.stringify(item.items));
+                newDraft.cart = normalizeCartItems(item.items);
                 newDraft.discount = item.discount || 0;
-                newDraft.discountType = item.discountType || 'rp';
                 newDraft.dp = item.dp || 0;
 
                 saveDrafts();
@@ -1763,9 +1789,21 @@
         }
 
         function deleteHistory(id) {
-            historyQuotes = historyQuotes.filter(h => h.id !== id);
-            localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
-            renderHistory();
+            if (confirm("Hapus catatan penawaran ini dari riwayat?")) {
+                historyQuotes = historyQuotes.filter(h => h.id !== id);
+                localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+                renderHistory();
+                showToast("Riwayat dihapus.");
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm("Apakah Anda yakin ingin menghapus seluruh arsip riwayat penawaran?")) {
+                historyQuotes = [];
+                localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+                renderHistory();
+                showToast("Seluruh riwayat penawaran telah dibersihkan.");
+            }
         }
 
         // KIRIM NOTA INVOICE VIA WHATSAPP
@@ -1776,9 +1814,8 @@
 
             const cust = draft.custName || "Pelanggan";
             const phoneInput = draft.custPhone || "";
-            const rawDisc = draft.discount || 0;
-            const discType = draft.discountType || 'rp';
-            const dp = draft.dp || 0;
+            const discount = parseFloat(draft.discount) || 0;
+            const dp = parseFloat(draft.dp) || 0;
 
             let text = `*NOTA INVOICE PENAWARAN MATERIAL*\n`;
             text += `*${storeProfile.name}*\n`;
@@ -1790,23 +1827,16 @@
 
             let subtotal = 0;
             cartItems.forEach((i, idx) => {
-                subtotal += (i.total || 0);
-                text += `${idx+1}. *${i.name}*\n   Qty: ${i.qty} @ Rp ${(i.price || 0).toLocaleString('id-ID')}\n   Total: Rp ${(i.total || 0).toLocaleString('id-ID')}\n\n`;
+                subtotal += i.total;
+                text += `${idx+1}. *${i.name}*\n   Qty: ${i.qtyVal} ${i.unit} ${i.note || ''} @ Rp ${i.price.toLocaleString('id-ID')}\n   Total: Rp ${i.total.toLocaleString('id-ID')}\n\n`;
             });
 
-            let discountVal = rawDisc;
-            let discLabel = `Diskon Toko`;
-            if (discType === 'percent') {
-                discountVal = Math.round(subtotal * (rawDisc / 100));
-                discLabel = `Diskon Toko (${rawDisc}%)`;
-            }
-
-            const grandTotal = Math.max(0, subtotal - discountVal);
+            const grandTotal = Math.max(0, subtotal - discount);
             const sisa = Math.max(0, grandTotal - dp);
 
             text += `--------------------------------------\n`;
             text += `Subtotal: Rp ${subtotal.toLocaleString('id-ID')}\n`;
-            if (discountVal > 0) text += `${discLabel}: -Rp ${discountVal.toLocaleString('id-ID')}\n`;
+            if (discount > 0) text += `Diskon Toko: -Rp ${discount.toLocaleString('id-ID')}\n`;
             text += `*GRAND TOTAL: Rp ${grandTotal.toLocaleString('id-ID')}*\n`;
             if (dp > 0) {
                 text += `Uang Muka / DP: Rp ${dp.toLocaleString('id-ID')}\n`;
@@ -1825,7 +1855,7 @@
                     if (storeProfile.qrisUrl.startsWith('http')) {
                         text += `• Link QRIS Pembayaran:\n  ${storeProfile.qrisUrl}\n`;
                     } else {
-                        text += `• Scan QRIS: (Terlampir pada Nota Struk / Cetakan PDF)\n`;
+                        text += `• Scan QRIS: (Terlampir pada Struk / Cetakan PDF)\n`;
                     }
                 }
             }
