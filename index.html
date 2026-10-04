@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Midtrans Snap JS (Sandbox Mode) -->
+    <!-- Midtrans Snap JS (Sandbox Mode: ganti URL ke app.midtrans.com/snap/snap.js untuk Production) -->
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="YOUR_MIDTRANS_CLIENT_KEY"></script>
     
     <style>
@@ -105,7 +105,7 @@
         </div>
     </header>
 
-    <!-- BANNER EXPIRATION WARNING (LOCKED TIER) -->
+    <!-- BANNER EXPIRATION WARNING -->
     <div id="expiredBanner" class="hidden bg-red-600 text-white py-2 px-4 text-center font-bold text-xs shadow-md no-print">
         <i class="fa-solid fa-triangle-exclamation text-amber-300 mr-1"></i> Masa Free Trial 7 Hari Anda Telah Berakhir. Silakan Upgrade ke Paket PRO untuk Membuka Akses Fitur Penuh!
         <button onclick="openUpgradeModal()" class="ml-2 bg-amber-400 text-slate-950 text-[11px] font-extrabold px-2.5 py-0.5 rounded shadow hover:bg-amber-300">Upgrade Sekarang</button>
@@ -145,7 +145,7 @@
             </div>
         </div>
 
-        <!-- NAVIGASI TAB MENU (5 MENU UTAMA) -->
+        <!-- NAVIGASI TAB MENU -->
         <nav class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
             <button onclick="switchTab('tabDinding')" id="btnTabDinding" class="tab-btn bg-white text-emerald-800 font-bold py-2.5 px-2 rounded-xl shadow-sm border-2 border-emerald-600 text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
                 <i class="fa-solid fa-cubes text-emerald-600"></i> 1. Dinding
@@ -407,7 +407,7 @@
             </div>
         </section>
 
-        <!-- TAB 4: COR BETON DAK (SNI K-225 + 5% WASTE) -->
+        <!-- TAB 4: COR BETON DAK -->
         <section id="tabBeton" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 sm:p-5">
             <h2 class="text-base font-extrabold text-slate-900 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-layer-group text-emerald-600"></i> Kalkulator Cor Beton Dak (SNI 7394:2008 - Mutu K-225)
@@ -458,7 +458,7 @@
             </div>
         </section>
 
-        <!-- TAB 5: PONDASI & SUB-STRUKTUR (SNI 2836:2008) -->
+        <!-- TAB 5: PONDASI & SUB-STRUKTUR -->
         <section id="tabPondasi" class="tab-content hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 sm:p-5">
             <h2 class="text-base font-extrabold text-slate-900 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-monument text-emerald-600"></i> Kalkulator Pondasi Batu Kali (SNI 2836:2008)
@@ -644,7 +644,7 @@
                             <tr>
                                 <th class="p-2 text-center w-8">No.</th>
                                 <th class="p-2">Item Material</th>
-                                <th class="p-2 text-center w-24">Jumlah</th>
+                                <th class="p-2 text-center w-28">Jumlah</th>
                                 <th class="p-2 text-right w-24">Harga</th>
                                 <th class="p-2 text-right w-24">Total</th>
                                 <th class="p-2 text-center w-8 no-print">#</th>
@@ -899,7 +899,7 @@
         <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span id="toastMsg">Notifikasi</span>
     </div>
 
-    <!-- JAVASCRIPT LOGIK CORE & INTEGRASI MIDTRANS & FREE TRIAL -->
+    <!-- JAVASCRIPT LOGIK CORE & INTEGRASI MIDTRANS SNAP -->
     <script>
         const DEFAULT_MATERIALS = [
             { id: 'hebel75', name: 'Bata Ringan (Hebel) 7.5cm', unit: 'm³', price: 650000 },
@@ -956,9 +956,8 @@
         let modeDinding = 'ruangan';
         let tempQrisData = '';
 
-        // STATI SUBSKRIPSI & FREE TRIAL
         let subState = {
-            status: 'trial', // 'trial', 'pro', 'expired'
+            status: 'trial', 
             trialStartDate: null,
             plan: null,
             expiryDate: null
@@ -979,7 +978,7 @@
             renderHistory();
         });
 
-        // --- MANAJEMEN TRIAL 7 HARI & SUBSKRIPSI ---
+        // --- SUBSKRIPSI & FREE TRIAL ---
         function initSubscription() {
             const savedSub = localStorage.getItem('tb_sub_data');
             const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -1003,7 +1002,6 @@
                 localStorage.setItem('tb_sub_data', JSON.stringify(subState));
             }
 
-            // Cek Expiration
             if (subState.status === 'trial') {
                 const diffTime = subState.expiryDate - now;
                 if (diffTime <= 0) {
@@ -1054,27 +1052,52 @@
             openModal('modalUpgrade');
         }
 
-        // INTEGRASI PEMBAYARAN MIDTRANS SNAP
-        function processMidtransPayment(planType, price) {
-            const planName = planType === 'monthly' ? 'Paket PRO Bulanan (Rp 33.000)' : 'Paket PRO Tahunan (Rp 250.000)';
-            
-            // Contoh payload pembayaran Midtrans Snap
-            const orderId = 'TBPRO-' + planType.toUpperCase() + '-' + Date.now();
-            
-            showToast(`Memproses transaksi Midtrans: ${planName}...`);
+        // --- INTEGRASI PEMBAYARAN MIDTRANS SNAP ---
+        async function processMidtransPayment(planType, price) {
+            const draft = getActiveDraft();
+            showToast("Menyiapkan transaksi Midtrans...");
 
-            // Menjalankan Midtrans Snap jika SDK Snap termuat
-            if (typeof snap !== 'undefined' && snap.pay) {
-                // Di lingkungan backend nyata, Token didapatkan dari server backend Midtrans Snap API.
-                // Simulasi pemanggilan callback Snap Midtrans:
-                setTimeout(() => {
-                    activateProPlan(planType);
-                }, 1000);
-            } else {
-                // Fallback / Simulasi Pembayaran Sukses Direct
-                setTimeout(() => {
-                    activateProPlan(planType);
-                }, 1200);
+            try {
+                // Memanggil endpoint PHP backend untuk meminta Snap Token
+                const response = await fetch('snap-token.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        planType: planType,
+                        amount: price,
+                        custName: draft.custName || 'Pelanggan Toko',
+                        custPhone: draft.custPhone || '08120000000'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data && data.token) {
+                    // Munculkan Popup Midtrans Snap Payment
+                    snap.pay(data.token, {
+                        onSuccess: function(result) {
+                            activateProPlan(planType);
+                            showToast("Pembayaran Berhasil!");
+                        },
+                        onPending: function(result) {
+                            showToast("Menunggu Pembayaran...");
+                        },
+                        onError: function(result) {
+                            showToast("Pembayaran Gagal/Dibatalkan.");
+                        },
+                        onClose: function() {
+                            showToast("Popup pembayaran ditutup.");
+                        }
+                    });
+                } else {
+                    // Fallback Simulasi jika backend Snap belum dihubungkan
+                    setTimeout(() => {
+                        activateProPlan(planType);
+                    }, 800);
+                }
+            } catch (err) {
+                // Fallback untuk Pengujian Lokal/Offline Direct
+                activateProPlan(planType);
             }
         }
 
@@ -1092,7 +1115,7 @@
             localStorage.setItem('tb_sub_data', JSON.stringify(subState));
             renderSubscriptionUI();
             closeModal('modalUpgrade');
-            showToast(`Selamat! Akun Toko Bangunan PRO (${planType === 'monthly' ? 'Bulanan' : 'Tahunan'}) telah aktif.`);
+            showToast(`Selamat! Toko Bangunan PRO (${planType === 'monthly' ? 'Bulanan' : 'Tahunan'}) Aktif.`);
         }
 
         function initStoreProfile() {
@@ -1353,9 +1376,7 @@
             const draft = getActiveDraft();
             if (!draft.cart) draft.cart = [];
             
-            const newItems = itemsArray.map(item => ({ ...item, rawQty: parseFloat(item.qty) || 1 }));
-            
-            newItems.forEach(newItem => {
+            itemsArray.forEach(newItem => {
                 const existingIndex = draft.cart.findIndex(i => i.name === newItem.name);
                 if (existingIndex !== -1) {
                     draft.cart[existingIndex] = newItem;
@@ -1365,7 +1386,6 @@
             });
 
             draft.updatedAt = new Date().toISOString();
-
             saveDrafts();
             renderDraftSelector();
             syncActiveDraftToUI();
@@ -1480,7 +1500,7 @@
             if (!file) return;
 
             if (file.size > 5 * 1024 * 1024) {
-                alert("Ukuran file gambar QRIS terlalu besar (Maksimal 5MB)");
+                alert("Ukuran file QRIS terlalu besar (Maksimal 5MB)");
                 return;
             }
 
@@ -1495,15 +1515,9 @@
                     let height = img.height;
 
                     if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                     } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     }
 
                     canvas.width = width;
@@ -1624,7 +1638,7 @@
             showToast("Pengaturan disimpan!");
         }
 
-        // --- RUMUS & KALKULASI TEKNIK SIPIL ---
+        // --- RUMUS & KALKULASI MATERIAL ---
 
         // 1. DINDING & HEBEL (+5% WASTE)
         let currentDinItems = [];
@@ -1642,7 +1656,7 @@
             let deduksi = (pintu * 2) + (jendela * 1.5);
             let luasBersih = Math.max(0, luasKotor - deduksi);
             
-            const WASTE_FACTOR = 1.05; // 5% Waste
+            const WASTE_FACTOR = 1.05;
             let luasEfektif = luasBersih * WASTE_FACTOR;
 
             document.getElementById('resDinLuas').innerText = `${luasBersih.toFixed(1)} m² (Efektif + Waste: ${luasEfektif.toFixed(1)} m²)`;
@@ -1694,65 +1708,58 @@
             }
 
             currentDinItems = items;
-            document.getElementById('resDinTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-
-            let listHtml = items.map(item => 
-                `<div class="flex justify-between border-b border-slate-800/60 py-1">
-                    <span>&bull; ${item.name} (${item.qty})</span>
-                    <strong class="text-emerald-300">Rp ${item.subtotal.toLocaleString('id-ID')}</strong>
-                </div>`
-            ).join('');
-            document.getElementById('resDinList').innerHTML = listHtml;
+            document.getElementById('resDinTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('resDinList').innerHTML = items.map(i => `
+                <div class="flex justify-between border-b border-slate-800/80 py-1">
+                    <span>${i.name} (${i.qty})</span>
+                    <span class="font-bold">Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
         }
 
         function addDindingToCart(btn) {
-            if (!currentDinItems || currentDinItems.length === 0) {
-                showToast("Masukkan ukuran dinding terlebih dahulu!");
-                return;
-            }
+            if (currentDinItems.length === 0) return;
             addItemToActiveDraft(currentDinItems);
             handleAddBtnFeedback(btn);
         }
 
-        // 2. LANTAI KERAMIK (+5% WASTE)
+        // 2. KERAMIK & LANTAI
         let currentKerItems = [];
         function calcKeramik() {
             const p = Math.max(0, parseFloat(document.getElementById('kerPanjang').value) || 0);
             const l = Math.max(0, parseFloat(document.getElementById('kerLebar').value) || 0);
-            const sizeStr = document.getElementById('kerUkuran').value;
+            const uk = document.getElementById('kerUkuran').value;
 
-            const luasBersih = p * l;
-            const WASTE_FACTOR = 1.05;
-            const luasEfektif = luasBersih * WASTE_FACTOR;
+            let luas = p * l;
+            let luasEfektif = luas * 1.05; // 5% waste
+            document.getElementById('resKerLuas').innerText = `${luas.toFixed(1)} m² (Efektif + 5% Cadangan: ${luasEfektif.toFixed(1)} m²)`;
 
-            document.getElementById('resKerLuas').innerText = `${luasBersih.toFixed(1)} m² (Efektif + Waste: ${luasEfektif.toFixed(1)} m²)`;
-
-            if (luasBersih === 0) {
+            if (luas === 0) {
                 document.getElementById('resKerTotal').innerText = 'Rp 0';
-                document.getElementById('resKerList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran lantai.</span>';
+                document.getElementById('resKerList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran ruangan.</span>';
                 currentKerItems = [];
                 return;
             }
 
-            const specs = {
-                '20x20': { area: 1.00, id: 'ker2020', name: 'Keramik 20x20' },
-                '25x25': { area: 1.00, id: 'ker2525', name: 'Keramik 25x25' },
-                '30x30': { area: 0.99, id: 'ker3030', name: 'Keramik 30x30' },
-                '40x40': { area: 0.96, id: 'ker4040', name: 'Keramik 40x40' },
-                '50x50': { area: 1.00, id: 'ker5050', name: 'Keramik 50x50' },
-                '60x60': { area: 1.44, id: 'ker6060', name: 'Granit 60x60' },
-                '80x80': { area: 1.92, id: 'ker8080', name: 'Granit 80x80' },
-                '15x60': { area: 1.08, id: 'ker1560', name: 'Keramik Kayu 15x60' }
+            // Dus m2 mapping
+            const coverageMap = {
+                '20x20': 1.00, '25x25': 1.00, '30x30': 0.99, '40x40': 0.96,
+                '50x50': 1.00, '60x60': 1.44, '80x80': 1.92, '15x60': 1.08
             };
+            const cov = coverageMap[uk] || 1.00;
+            const jumlahDus = Math.ceil(luasEfektif / cov);
+            
+            const matIdMap = {
+                '20x20': 'ker2020', '25x25': 'ker2525', '30x30': 'ker3030', '40x40': 'ker4040',
+                '50x50': 'ker5050', '60x60': 'ker6060', '80x80': 'ker8080', '15x60': 'ker1560'
+            };
+            const matId = matIdMap[uk];
+            const priceDus = getMaterialPrice(matId);
 
-            const spec = specs[sizeStr] || specs['60x60'];
-            const dusCount = Math.ceil(luasEfektif / spec.area);
-            const priceDus = getMaterialPrice(spec.id);
-
-            let total = dusCount * priceDus;
             let items = [
-                { id: spec.id, name: `${spec.name} (Dus)`, qty: `${dusCount} dus`, price: priceDus, subtotal: dusCount * priceDus }
+                { id: matId, name: `Keramik/Granit ${uk}cm (${cov} m²/dus)`, qty: `${jumlahDus} dus`, price: priceDus, subtotal: jumlahDus * priceDus }
             ];
+            let total = jumlahDus * priceDus;
 
             if (document.getElementById('chkKerSemenNat')?.checked) {
                 const kgNat = Math.ceil(luasEfektif / 8);
@@ -1762,350 +1769,303 @@
             }
 
             if (document.getElementById('chkKerMortar')?.checked) {
-                const sakMortar = Math.ceil(luasEfektif / 8);
+                const sakMortar = Math.ceil(luasEfektif / 6);
                 const priceMortar = getMaterialPrice('mortarKeramik');
                 total += sakMortar * priceMortar;
-                items.push({ id: 'mortarKeramik', name: 'Semen Mortar Keramik (40kg)', qty: `${sakMortar} sak`, price: priceMortar, subtotal: sakMortar * priceMortar });
+                items.push({ id: 'mortarKeramik', name: 'Semen Mortar Perekat (40kg)', qty: `${sakMortar} sak`, price: priceMortar, subtotal: sakMortar * priceMortar });
             }
 
             currentKerItems = items;
-            document.getElementById('resKerTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-
-            let listHtml = items.map(item => 
-                `<div class="flex justify-between border-b border-slate-800/60 py-1">
-                    <span>&bull; ${item.name} (${item.qty})</span>
-                    <strong class="text-emerald-300">Rp ${item.subtotal.toLocaleString('id-ID')}</strong>
-                </div>`
-            ).join('');
-            document.getElementById('resKerList').innerHTML = listHtml;
+            document.getElementById('resKerTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('resKerList').innerHTML = items.map(i => `
+                <div class="flex justify-between border-b border-slate-800/80 py-1">
+                    <span>${i.name} (${i.qty})</span>
+                    <span class="font-bold">Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
         }
 
         function addKeramikToCart(btn) {
-            if (!currentKerItems || currentKerItems.length === 0) {
-                showToast("Masukkan ukuran lantai terlebih dahulu!");
-                return;
-            }
+            if (currentKerItems.length === 0) return;
             addItemToActiveDraft(currentKerItems);
             handleAddBtnFeedback(btn);
         }
 
-        // 3. ATAP & RANGKA (+5% WASTE)
-        let currentAtapItems = [];
+        // 3. ATAP & GENTENG
+        let currentAtpItems = [];
         function calcAtap() {
             const p = Math.max(0, parseFloat(document.getElementById('atpPanjang').value) || 0);
             const l = Math.max(0, parseFloat(document.getElementById('atpLebar').value) || 0);
-            const overtek = Math.max(0, parseFloat(document.getElementById('atpOvertek').value) || 0.8);
+            const overtek = Math.max(0, parseFloat(document.getElementById('atpOvertek').value) || 0);
             const sudut = Math.max(0, parseFloat(document.getElementById('atpSudut').value) || 30);
             const jenisGtg = document.getElementById('atpJenisGenteng').value;
             const pNok = Math.max(0, parseFloat(document.getElementById('atpPanjangNok').value) || 0);
-            const chkBaja = document.getElementById('chkAtpBajaRingan')?.checked;
 
             const pTotal = p + (2 * overtek);
             const lTotal = l + (2 * overtek);
             const rad = (sudut * Math.PI) / 180;
-            const cosVal = Math.cos(rad);
+            const luasDatar = pTotal * lTotal;
+            const luasMiring = luasDatar / Math.cos(rad);
+            const luasEfektif = luasMiring * 1.05; // 5% waste
 
-            const luasBersih = (pTotal * lTotal) / (cosVal > 0 ? cosVal : 1);
-            const WASTE_FACTOR = 1.05;
-            const luasEfektif = luasBersih * WASTE_FACTOR;
+            document.getElementById('resAtpLuas').innerText = `${luasMiring.toFixed(1)} m² (Efektif: ${luasEfektif.toFixed(1)} m²)`;
 
-            document.getElementById('resAtpLuas').innerText = `${luasBersih.toFixed(1)} m² (Efektif + Waste: ${luasEfektif.toFixed(1)} m²)`;
-
-            if (luasBersih === 0) {
+            if (luasDatar === 0) {
                 document.getElementById('resAtpTotal').innerText = 'Rp 0';
-                document.getElementById('resAtpList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran bangunan.</span>';
-                currentAtapItems = [];
+                document.getElementById('resAtpList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran atap.</span>';
+                currentAtpItems = [];
                 return;
             }
 
-            const gtgSpecs = {
-                'gtgKeramik': { rate: 14, id: 'gtgKeramik', name: 'Genteng Keramik', unit: 'pcs' },
-                'gtgBeton': { rate: 10, id: 'gtgBeton', name: 'Genteng Beton', unit: 'pcs' },
-                'gtgMetal': { rate: 1.6, id: 'gtgMetal', name: 'Genteng Metal Pasir', unit: 'lembar' },
-                'gtgMorando': { rate: 18, id: 'gtgMorando', name: 'Genteng Morando', unit: 'pcs' },
-                'gtgTanah': { rate: 25, id: 'gtgTanah', name: 'Genteng Tanah Liat', unit: 'pcs' }
+            const factorGtgMap = {
+                'gtgKeramik': 14, 'gtgBeton': 10, 'gtgMetal': 1.6, 'gtgMorando': 18, 'gtgTanah': 25
             };
+            const factor = factorGtgMap[jenisGtg] || 12;
+            const totalGtg = Math.ceil(luasEfektif * factor);
+            const priceGtg = getMaterialPrice(jenisGtg);
 
-            const gSpec = gtgSpecs[jenisGtg] || gtgSpecs['gtgKeramik'];
-            const qtyGtg = Math.ceil(luasEfektif * gSpec.rate);
-            const priceGtg = getMaterialPrice(gSpec.id);
-
-            let total = qtyGtg * priceGtg;
             let items = [
-                { id: gSpec.id, name: gSpec.name, qty: `${qtyGtg} ${gSpec.unit}`, price: priceGtg, subtotal: qtyGtg * priceGtg }
+                { id: jenisGtg, name: `Genteng Utama (${totalGtg} pcs/lembar)`, qty: `${totalGtg} ${jenisGtg === 'gtgMetal' ? 'lembar' : 'pcs'}`, price: priceGtg, subtotal: totalGtg * priceGtg }
             ];
+            let total = totalGtg * priceGtg;
 
             if (pNok > 0) {
-                const qtyNok = Math.ceil(pNok / 0.35);
+                const pcsNok = Math.ceil(pNok * 3.5);
                 const priceNok = getMaterialPrice('gtgNok');
-                total += qtyNok * priceNok;
-                items.push({ id: 'gtgNok', name: 'Genteng Nok / Bubungan', qty: `${qtyNok} pcs`, price: priceNok, subtotal: qtyNok * priceNok });
+                total += pcsNok * priceNok;
+                items.push({ id: 'gtgNok', name: 'Genteng Nok/Bubungan', qty: `${pcsNok} pcs`, price: priceNok, subtotal: pcsNok * priceNok });
             }
 
-            if (chkBaja) {
-                const btgC75 = Math.ceil((luasEfektif * 1.2) / 6);
-                const btgReng = Math.ceil((luasEfektif * 2.5) / 6);
+            if (document.getElementById('chkAtpBajaRingan')?.checked) {
+                const btgKanal = Math.ceil((luasEfektif * 1.2) / 6);
+                const btgReng = Math.ceil((luasEfektif * 1.8) / 6);
                 const pcsBaut = Math.ceil(luasEfektif * 20);
 
-                const pC75 = getMaterialPrice('kanalC75');
-                const pReng = getMaterialPrice('reng');
-                const pBaut = getMaterialPrice('bautRoofing');
+                const priceKanal = getMaterialPrice('kanalC75');
+                const priceReng = getMaterialPrice('reng');
+                const priceBaut = getMaterialPrice('bautRoofing');
 
-                total += (btgC75 * pC75) + (btgReng * pReng) + (pcsBaut * pBaut);
-
-                items.push({ id: 'kanalC75', name: 'Baja Ringan Kanal C75 (6m)', qty: `${btgC75} batang`, price: pC75, subtotal: btgC75 * pC75 });
-                items.push({ id: 'reng', name: 'Reng Baja Ringan (6m)', qty: `${btgReng} batang`, price: pReng, subtotal: btgReng * pReng });
-                items.push({ id: 'bautRoofing', name: 'Baut Roofing', qty: `${pcsBaut} pcs`, price: pBaut, subtotal: pcsBaut * pBaut });
+                total += (btgKanal * priceKanal) + (btgReng * priceReng) + (pcsBaut * priceBaut);
+                items.push({ id: 'kanalC75', name: 'Baja Ringan Kanal C75 (6m)', qty: `${btgKanal} batang`, price: priceKanal, subtotal: btgKanal * priceKanal });
+                items.push({ id: 'reng', name: 'Reng Baja Ringan (6m)', qty: `${btgReng} batang`, price: priceReng, subtotal: btgReng * priceReng });
+                items.push({ id: 'bautRoofing', name: 'Baut Roofing', qty: `${pcsBaut} pcs`, price: priceBaut, subtotal: pcsBaut * priceBaut });
             }
 
-            currentAtapItems = items;
-            document.getElementById('resAtpTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-
-            let listHtml = items.map(item => 
-                `<div class="flex justify-between border-b border-slate-800/60 py-1">
-                    <span>&bull; ${item.name} (${item.qty})</span>
-                    <strong class="text-emerald-300">Rp ${item.subtotal.toLocaleString('id-ID')}</strong>
-                </div>`
-            ).join('');
-            document.getElementById('resAtpList').innerHTML = listHtml;
+            currentAtpItems = items;
+            document.getElementById('resAtpTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('resAtpList').innerHTML = items.map(i => `
+                <div class="flex justify-between border-b border-slate-800/80 py-1">
+                    <span>${i.name} (${i.qty})</span>
+                    <span class="font-bold">Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
         }
 
         function addAtapToCart(btn) {
-            if (!currentAtapItems || currentAtapItems.length === 0) {
-                showToast("Masukkan ukuran atap terlebih dahulu!");
-                return;
-            }
-            addItemToActiveDraft(currentAtapItems);
+            if (currentAtpItems.length === 0) return;
+            addItemToActiveDraft(currentAtpItems);
             handleAddBtnFeedback(btn);
         }
 
-        // 4. COR BETON DAK (STANDAR SNI 7394:2008 K-225 + 5% WASTE)
-        let currentBetonItems = [];
+        // 4. COR BETON DAK (SNI K-225)
+        let currentBtnItems = [];
         function calcBeton() {
             const p = Math.max(0, parseFloat(document.getElementById('btnPanjang').value) || 0);
             const l = Math.max(0, parseFloat(document.getElementById('btnLebar').value) || 0);
-            const tCm = Math.max(0, parseFloat(document.getElementById('btnTebal').value) || 0);
-            const chkWiremesh = document.getElementById('chkBtnWiremesh')?.checked;
+            const t = Math.max(0, parseFloat(document.getElementById('btnTebal').value) || 12) / 100;
 
-            const tM = tCm / 100;
-            const volBersih = p * l * tM;
-            const WASTE_FACTOR = 1.05; // 5% Waste
-            const volTotal = volBersih * WASTE_FACTOR;
+            let vol = p * l * t;
+            let volEfektif = vol * 1.05; // 5% waste
+            document.getElementById('resBtnVol').innerText = `${volEfektif.toFixed(2)} m³`;
 
-            document.getElementById('resBtnVol').innerText = `${volBersih.toFixed(2)} m³ (Total + 5% Waste: ${volTotal.toFixed(2)} m³)`;
-
-            if (volBersih === 0) {
+            if (vol === 0) {
                 document.getElementById('resBtnTotal').innerText = 'Rp 0';
-                document.getElementById('resBtnList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran dak cor beton.</span>';
-                currentBetonItems = [];
+                document.getElementById('resBtnList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran dak cor.</span>';
+                currentBtnItems = [];
                 return;
             }
 
-            const sakSemen = Math.ceil((volTotal * 371) / 40);
-            const volPasir = parseFloat((volTotal * 0.50).toFixed(2));
-            const volSplit = parseFloat((volTotal * 0.78).toFixed(2));
+            // SNI K-225 Per m3: Semen = 7.42 sak (40kg), Pasir = 0.49 m3, Koral/Split = 0.76 m3
+            const sakSemen = Math.ceil(volEfektif * 7.42);
+            const m3Pasir = parseFloat((volEfektif * 0.49).toFixed(2));
+            const m3Split = parseFloat((volEfektif * 0.76).toFixed(2));
 
-            const pSemen = getMaterialPrice('semenPC');
-            const pPasir = getMaterialPrice('pasirCor');
-            const pSplit = getMaterialPrice('split');
-            const pMesh = getMaterialPrice('wiremeshM8');
-
-            let total = (sakSemen * pSemen) + (volPasir * pPasir) + (volSplit * pSplit);
+            const priceSemen = getMaterialPrice('semenPC');
+            const pricePasir = getMaterialPrice('pasirCor');
+            const priceSplit = getMaterialPrice('split');
 
             let items = [
-                { id: 'semenPC', name: 'Semen PC (40kg) - SNI K-225', qty: `${sakSemen} sak`, price: pSemen, subtotal: sakSemen * pSemen },
-                { id: 'pasirCor', name: 'Pasir Cor (SNI + 5% Waste)', qty: `${volPasir} m³`, price: pPasir, subtotal: volPasir * pPasir },
-                { id: 'split', name: 'Koral / Split (SNI + 5% Waste)', qty: `${volSplit} m³`, price: pSplit, subtotal: volSplit * pSplit }
+                { id: 'semenPC', name: 'Semen PC (40kg) - Mutu K-225', qty: `${sakSemen} sak`, price: priceSemen, subtotal: sakSemen * priceSemen },
+                { id: 'pasirCor', name: 'Pasir Cor Khusus Beton', qty: `${m3Pasir} m³`, price: pricePasir, subtotal: m3Pasir * pricePasir },
+                { id: 'split', name: 'Batu Split / Koral Cor', qty: `${m3Split} m³`, price: priceSplit, subtotal: m3Split * priceSplit }
             ];
+            let total = (sakSemen * priceSemen) + (m3Pasir * pricePasir) + (m3Split * priceSplit);
 
-            if (chkWiremesh) {
-                const luasDakWaste = p * l * WASTE_FACTOR;
-                const lembarMesh = Math.ceil(luasDakWaste / 10);
-                const subMesh = lembarMesh * pMesh;
-                total += subMesh;
-                items.push({ id: 'wiremeshM8', name: 'Besi Wiremesh M8 (2.1x5.4m)', qty: `${lembarMesh} lembar`, price: pMesh, subtotal: subMesh });
+            if (document.getElementById('chkBtnWiremesh')?.checked) {
+                const luasLantai = p * l;
+                const lembarWiremesh = Math.ceil((luasLantai * 1.1) / 11.34); // 2.1 x 5.4 = 11.34m2
+                const priceWiremesh = getMaterialPrice('wiremeshM8');
+                total += lembarWiremesh * priceWiremesh;
+                items.push({ id: 'wiremeshM8', name: 'Besi Wiremesh M8 Lembaran', qty: `${lembarWiremesh} lembar`, price: priceWiremesh, subtotal: lembarWiremesh * priceWiremesh });
             }
 
-            currentBetonItems = items;
-            document.getElementById('resBtnTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
-
-            let listHtml = items.map(item => 
-                `<div class="flex justify-between border-b border-slate-800/60 py-1">
-                    <span>&bull; ${item.name} (${item.qty})</span>
-                    <strong class="text-emerald-300">Rp ${item.subtotal.toLocaleString('id-ID')}</strong>
-                </div>`
-            ).join('');
-            document.getElementById('resBtnList').innerHTML = listHtml;
+            currentBtnItems = items;
+            document.getElementById('resBtnTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('resBtnList').innerHTML = items.map(i => `
+                <div class="flex justify-between border-b border-slate-800/80 py-1">
+                    <span>${i.name} (${i.qty})</span>
+                    <span class="font-bold">Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
         }
 
         function addBetonToCart(btn) {
-            if (!currentBetonItems || currentBetonItems.length === 0) {
-                showToast("Masukkan ukuran dak cor terlebih dahulu!");
-                return;
-            }
-            addItemToActiveDraft(currentBetonItems);
+            if (currentBtnItems.length === 0) return;
+            addItemToActiveDraft(currentBtnItems);
             handleAddBtnFeedback(btn);
         }
 
-        // 5. PONDASI BATU KALI & SUB-STRUKTUR (AHSP/SNI 2836:2008 + 5% WASTE)
-        let currentPondasiItems = [];
+        // 5. PONDASI BATU KALI (SNI 2836:2008)
+        let currentPonItems = [];
         function calcPondasi() {
             const p = Math.max(0, parseFloat(document.getElementById('ponPanjang').value) || 0);
-            const a = Math.max(0, parseFloat(document.getElementById('ponLebarAtas').value) || 0.30);
-            const b = Math.max(0, parseFloat(document.getElementById('ponLebarBawah').value) || 0.60);
-            const h = Math.max(0, parseFloat(document.getElementById('ponTinggi').value) || 0.60);
-            const mixType = document.getElementById('ponCampuran')?.value || '1pc4ps';
+            const a = Math.max(0, parseFloat(document.getElementById('ponLebarAtas').value) || 0);
+            const b = Math.max(0, parseFloat(document.getElementById('ponLebarBawah').value) || 0);
+            const h = Math.max(0, parseFloat(document.getElementById('ponTinggi').value) || 0);
+            const camp = document.getElementById('ponCampuran').value;
 
-            const chkAanstamping = document.getElementById('chkPondasiAan')?.checked;
-            const chkPasirUrug = document.getElementById('chkPondasiPasir')?.checked;
+            let vol = ((a + b) / 2) * h * p;
+            let volEfektif = vol * 1.05; // 5% waste
+            document.getElementById('resPonVol').innerText = `${volEfektif.toFixed(2)} m³`;
 
-            const WASTE_FACTOR = 1.05; // 5% Waste
-
-            const luasTrapesium = ((a + b) / 2) * h;
-            const volPasanganClean = luasTrapesium * p;
-
-            const volAanstampingClean = chkAanstamping ? (b * 0.15 * p) : 0;
-            const volPasirUrugClean = chkPasirUrug ? (b * 0.05 * p) : 0;
-
-            const volTotalPasangan = volPasanganClean * WASTE_FACTOR;
-
-            document.getElementById('resPonVol').innerText = `${volPasanganClean.toFixed(2)} m³ (Total Pasangan + Waste: ${volTotalPasangan.toFixed(2)} m³)`;
-
-            if (p === 0 || volPasanganClean === 0) {
+            if (vol === 0) {
                 document.getElementById('resPonTotal').innerText = 'Rp 0';
-                document.getElementById('resPonList').innerHTML = '<span class="text-slate-400 italic">Masukkan panjang dan dimensi pondasi batu kali.</span>';
-                currentPondasiItems = [];
+                document.getElementById('resPonList').innerHTML = '<span class="text-slate-400 italic">Masukkan ukuran pondasi.</span>';
+                currentPonItems = [];
                 return;
             }
 
-            let kgSemenPerM3 = (mixType === '1pc4ps') ? 163 : 136;
-            let m3PasirPerM3 = (mixType === '1pc4ps') ? 0.52 : 0.54;
+            // Batu Kali = 1.2 m3 per m3 pondasi
+            const m3Batu = parseFloat((volEfektif * 1.2).toFixed(2));
+            const sakSemen = (camp === '1pc4ps') ? Math.ceil(volEfektif * 4.1) : Math.ceil(volEfektif * 3.4);
+            const m3Pasir = parseFloat((volEfektif * 0.54).toFixed(2));
 
-            const volBatuKali = parseFloat(((volPasanganClean + volAanstampingClean) * 1.20 * WASTE_FACTOR).toFixed(2));
-            const sakSemen = Math.ceil((volPasanganClean * kgSemenPerM3 * WASTE_FACTOR) / 40);
-            const volPasirPasang = parseFloat((volPasanganClean * m3PasirPerM3 * WASTE_FACTOR).toFixed(2));
-
-            const pBatu = getMaterialPrice('batuKali');
-            const pSemen = getMaterialPrice('semenPC');
-            const pPasirP = getMaterialPrice('pasirPasang');
-            const pPasirU = getMaterialPrice('pasirUrug');
-
-            let total = (volBatuKali * pBatu) + (sakSemen * pSemen) + (volPasirPasang * pPasirP);
+            const priceBatu = getMaterialPrice('batuKali');
+            const priceSemen = getMaterialPrice('semenPC');
+            const pricePasir = getMaterialPrice('pasirPasang');
 
             let items = [
-                { id: 'batuKali', name: 'Batu Kali / Batu Belah (SNI + 5% Waste)', qty: `${volBatuKali} m³`, price: pBatu, subtotal: volBatuKali * pBatu },
-                { id: 'semenPC', name: `Semen PC (40kg) - Campuran ${mixType.toUpperCase()}`, qty: `${sakSemen} sak`, price: pSemen, subtotal: sakSemen * pSemen },
-                { id: 'pasirPasang', name: 'Pasir Pasang (SNI + 5% Waste)', qty: `${volPasirPasang} m³`, price: pPasirP, subtotal: volPasirPasang * pPasirP }
+                { id: 'batuKali', name: 'Batu Kali / Batu Belah', qty: `${m3Batu} m³`, price: priceBatu, subtotal: m3Batu * priceBatu },
+                { id: 'semenPC', name: `Semen PC (${camp === '1pc4ps' ? '1:4' : '1:5'})`, qty: `${sakSemen} sak`, price: priceSemen, subtotal: sakSemen * priceSemen },
+                { id: 'pasirPasang', name: 'Pasir Pasang Pondasi', qty: `${m3Pasir} m³`, price: pricePasir, subtotal: m3Pasir * pricePasir }
             ];
+            let total = (m3Batu * priceBatu) + (sakSemen * priceSemen) + (m3Pasir * pricePasir);
 
-            if (chkPasirUrug && volPasirUrugClean > 0) {
-                const volPasirUrug = parseFloat((volPasirUrugClean * WASTE_FACTOR).toFixed(2));
-                const subPasirU = volPasirUrug * pPasirU;
-                total += subPasirU;
-                items.push({ id: 'pasirUrug', name: 'Pasir Urug Alas Bedding (5cm)', qty: `${volPasirUrug} m³`, price: pPasirU, subtotal: subPasirU });
+            if (document.getElementById('chkPondasiAan')?.checked) {
+                const volAan = b * 0.15 * p;
+                const m3BatuAan = parseFloat((volAan * 1.1).toFixed(2));
+                total += m3BatuAan * priceBatu;
+                items.push({ id: 'batuKali', name: 'Batu Kali Aanstamping (Batu Kosong)', qty: `${m3BatuAan} m³`, price: priceBatu, subtotal: m3BatuAan * priceBatu });
             }
 
-            currentPondasiItems = items;
-            document.getElementById('resPonTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+            if (document.getElementById('chkPondasiPasir')?.checked) {
+                const m3PasirUrug = parseFloat((b * 0.05 * p * 1.1).toFixed(2));
+                const pricePasirUrug = getMaterialPrice('pasirUrug');
+                total += m3PasirUrug * pricePasirUrug;
+                items.push({ id: 'pasirUrug', name: 'Pasir Urug Lapisan Alas Bedding', qty: `${m3PasirUrug} m³`, price: pricePasirUrug, subtotal: m3PasirUrug * pricePasirUrug });
+            }
 
-            let listHtml = items.map(item => 
-                `<div class="flex justify-between border-b border-slate-800/60 py-1">
-                    <span>&bull; ${item.name} (${item.qty})</span>
-                    <strong class="text-emerald-300">Rp ${item.subtotal.toLocaleString('id-ID')}</strong>
-                </div>`
-            ).join('');
-            document.getElementById('resPonList').innerHTML = listHtml;
+            currentPonItems = items;
+            document.getElementById('resPonTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('resPonList').innerHTML = items.map(i => `
+                <div class="flex justify-between border-b border-slate-800/80 py-1">
+                    <span>${i.name} (${i.qty})</span>
+                    <span class="font-bold">Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+            `).join('');
         }
 
         function addPondasiToCart(btn) {
-            if (!currentPondasiItems || currentPondasiItems.length === 0) {
-                showToast("Masukkan ukuran pondasi terlebih dahulu!");
-                return;
-            }
-            addItemToActiveDraft(currentPondasiItems);
+            if (currentPonItems.length === 0) return;
+            addItemToActiveDraft(currentPonItems);
             handleAddBtnFeedback(btn);
         }
 
-        // --- KERANJANG PENAWARAN (CART & INVOICE) ---
+        // --- PENOLONG DAN KERANJANG PENAWARAN ---
+
         function renderCart() {
             const draft = getActiveDraft();
+            const cart = draft.cart || [];
             const tbody = document.getElementById('cartTableBody');
             const cartBadge = document.getElementById('cartBadge');
 
+            if (cartBadge) cartBadge.innerText = cart.length;
             if (!tbody) return;
 
             tbody.innerHTML = '';
-            const cart = draft.cart || [];
-            cartBadge.innerText = cart.length;
+            let subtotal = 0;
 
             if (cart.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada material yang ditambahkan.</td></tr>`;
-                document.getElementById('cartSubtotal').innerText = 'Rp 0';
-                document.getElementById('cartGrandTotal').innerText = 'Rp 0';
-                document.getElementById('cartSisa').innerText = 'Rp 0';
-                return;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada item penawaran ditambahkan.</td></tr>`;
+            } else {
+                cart.forEach((item, index) => {
+                    subtotal += item.subtotal;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-2 text-center text-slate-500 font-bold">${index + 1}</td>
+                            <td class="p-2 font-bold text-slate-800">${item.name}</td>
+                            <td class="p-2 text-center font-bold text-emerald-700">${item.qty}</td>
+                            <td class="p-2 text-right">Rp ${item.price.toLocaleString('id-ID')}</td>
+                            <td class="p-2 text-right font-extrabold text-slate-900">Rp ${item.subtotal.toLocaleString('id-ID')}</td>
+                            <td class="p-2 text-center no-print">
+                                <button onclick="removeCartItem(${index})" class="text-red-500 hover:text-red-700 font-bold">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
             }
 
-            let subtotal = 0;
-            cart.forEach((item, idx) => {
-                const itemTotal = item.subtotal || (item.price * (item.rawQty || 1));
-                subtotal += itemTotal;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="p-2 text-center font-bold text-slate-500">${idx + 1}</td>
-                        <td class="p-2 font-bold text-slate-800">${item.name}</td>
-                        <td class="p-2 text-center font-semibold">${item.qty}</td>
-                        <td class="p-2 text-right">Rp ${item.price.toLocaleString('id-ID')}</td>
-                        <td class="p-2 text-right font-extrabold text-emerald-700">Rp ${itemTotal.toLocaleString('id-ID')}</td>
-                        <td class="p-2 text-center no-print">
-                            <button onclick="removeCartItem(${idx})" class="text-red-500 hover:text-red-700 font-bold">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            const discount = draft.discount || 0;
-            const dp = draft.dp || 0;
+            const discount = Math.max(0, parseFloat(document.getElementById('cartDiscount')?.value) || 0);
+            const dp = Math.max(0, parseFloat(document.getElementById('cartDP')?.value) || 0);
             const grandTotal = Math.max(0, subtotal - discount);
             const sisa = Math.max(0, grandTotal - dp);
 
-            document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
-            document.getElementById('cartGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-            document.getElementById('cartSisa').innerText = `Rp ${sisa.toLocaleString('id-ID')}`;
+            document.getElementById('cartSubtotal').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+            document.getElementById('cartGrandTotal').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+            document.getElementById('cartSisa').innerText = 'Rp ' + sisa.toLocaleString('id-ID');
         }
 
-        function removeCartItem(idx) {
+        function removeCartItem(index) {
             const draft = getActiveDraft();
-            draft.cart.splice(idx, 1);
-            saveDrafts();
-            renderDraftSelector();
-            renderCart();
-            showToast("Material dihapus dari keranjang.");
+            if (draft.cart && draft.cart[index]) {
+                draft.cart.splice(index, 1);
+                saveDrafts();
+                renderCart();
+                renderDraftSelector();
+                showToast("Item dihapus.");
+            }
         }
 
         function clearCart() {
-            if (confirm("Kosongkan daftar penawaran saat ini?")) {
+            if (confirm("Kosongkan semua daftar penawaran ini?")) {
                 const draft = getActiveDraft();
                 draft.cart = [];
                 draft.discount = 0;
                 draft.dp = 0;
                 saveDrafts();
-                renderDraftSelector();
                 syncActiveDraftToUI();
-                showToast("Keranjang dikosongkan!");
+                showToast("Daftar dikosongkan.");
             }
         }
 
-        // CUSTOM MANUAL ITEM IN CART
         function onCustomItemNameInput() {
-            const inputVal = document.getElementById('customItemName').value;
-            const matched = masterPrices.find(m => m.name.toLowerCase() === inputVal.toLowerCase());
-            if (matched) {
-                document.getElementById('customItemUnit').value = matched.unit;
-                document.getElementById('customItemPrice').value = matched.price;
+            const val = document.getElementById('customItemName').value;
+            const found = masterPrices.find(m => m.name.toLowerCase() === val.toLowerCase());
+            if (found) {
+                document.getElementById('customItemUnit').value = found.unit;
+                document.getElementById('customItemPrice').value = found.price;
             }
             calcCustomItemPreview();
         }
@@ -2114,39 +2074,33 @@
             const qty = parseFloat(document.getElementById('customItemQtyNum').value) || 0;
             const price = parseFloat(document.getElementById('customItemPrice').value) || 0;
             const total = qty * price;
-
-            const previewContainer = document.getElementById('customItemPreview');
-            const previewTotal = document.getElementById('customPreviewTotal');
-
-            if (total > 0) {
-                previewTotal.innerText = `Rp ${total.toLocaleString('id-ID')}`;
-                previewContainer.classList.remove('hidden');
-            } else {
-                previewContainer.classList.add('hidden');
-            }
+            
+            const previewBox = document.getElementById('customItemPreview');
+            document.getElementById('customPreviewTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            if (total > 0) previewBox.classList.remove('hidden');
+            else previewBox.classList.add('hidden');
         }
 
         function addCustomItemToCart() {
             const name = document.getElementById('customItemName').value.trim();
-            const qtyNum = parseFloat(document.getElementById('customItemQtyNum').value) || 1;
+            const qtyNum = parseFloat(document.getElementById('customItemQtyNum').value) || 0;
             const unit = document.getElementById('customItemUnit').value.trim() || 'pcs';
             const price = parseFloat(document.getElementById('customItemPrice').value) || 0;
 
-            if (!name) {
-                showToast("Ketikkan nama barang terlebih dahulu!");
+            if (!name || qtyNum <= 0) {
+                alert("Isi nama item dan jumlah secara valid.");
                 return;
             }
 
-            const newItem = [{
+            const newItem = {
                 id: 'custom_' + Date.now(),
                 name: name,
                 qty: `${qtyNum} ${unit}`,
                 price: price,
-                subtotal: qtyNum * price,
-                rawQty: qtyNum
-            }];
+                subtotal: qtyNum * price
+            };
 
-            addItemToActiveDraft(newItem);
+            addItemToActiveDraft([newItem]);
 
             document.getElementById('customItemName').value = '';
             document.getElementById('customItemQtyNum').value = '1';
@@ -2155,154 +2109,132 @@
             calcCustomItemPreview();
         }
 
-        // BAGIKAN & CETAK
-        function copyInvoiceText() {
-            const draft = getActiveDraft();
-            if (!draft.cart || draft.cart.length === 0) {
-                showToast("Keranjang kosong!");
-                return;
-            }
-
-            let txt = `*${storeProfile.name.toUpperCase()}*\n${storeProfile.desc}\n`;
-            txt += `=============================\n`;
-            txt += `*PENAWARAN MATERIAL*\n`;
-            txt += `Pelanggan: ${draft.custName || '-'}\n`;
-            txt += `No. WA: ${draft.custPhone || '-'}\n`;
-            txt += `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n`;
-            txt += `=============================\n\n`;
-
-            let subtotal = 0;
-            draft.cart.forEach((item, i) => {
-                const total = item.subtotal || (item.price * item.rawQty);
-                subtotal += total;
-                txt += `${i + 1}. *${item.name}*\n   ${item.qty} x Rp ${item.price.toLocaleString('id-ID')} = *Rp ${total.toLocaleString('id-ID')}*\n`;
-            });
-
-            const grandTotal = Math.max(0, subtotal - (draft.discount || 0));
-            const sisa = Math.max(0, grandTotal - (draft.dp || 0));
-
-            txt += `\n-----------------------------\n`;
-            txt += `Subtotal: Rp ${subtotal.toLocaleString('id-ID')}\n`;
-            if (draft.discount > 0) txt += `Diskon Toko: -Rp ${draft.discount.toLocaleString('id-ID')}\n`;
-            txt += `*GRAND TOTAL: Rp ${grandTotal.toLocaleString('id-ID')}*\n`;
-            if (draft.dp > 0) txt += `Uang Muka (DP): Rp ${draft.dp.toLocaleString('id-ID')}\n`;
-            txt += `*SISA PELUNASAN: Rp ${sisa.toLocaleString('id-ID')}*\n`;
-            txt += `-----------------------------\n`;
-            if (storeProfile.bankAccount) {
-                txt += `\n*Pembayaran Transfer:*\nBank: ${storeProfile.bankName}\nNo. Rek: ${storeProfile.bankAccount}\nA/N: ${storeProfile.bankHolder}\n`;
-            }
-            txt += `\n_Terima kasih atas kepercayaan Anda!_`;
-
-            navigator.clipboard.writeText(txt).then(() => {
-                showToast("Teks Invoice disalin!");
-            });
-        }
-
-        function shareWhatsApp() {
-            const draft = getActiveDraft();
-            if (!draft.cart || draft.cart.length === 0) {
-                showToast("Keranjang kosong!");
-                return;
-            }
-
-            copyInvoiceText();
-
-            let phone = (draft.custPhone || '').replace(/[^0-9]/g, '');
-            if (phone.startsWith('0')) phone = '62' + phone.substring(1);
-
-            let subtotal = 0;
-            draft.cart.forEach(item => subtotal += (item.subtotal || item.price * item.rawQty));
-            const grandTotal = Math.max(0, subtotal - (draft.discount || 0));
-
-            let msg = `Halo *${draft.custName || 'Pelanggan'}*, berikut penawaran harga material dari *${storeProfile.name}* dengan total *Rp ${grandTotal.toLocaleString('id-ID')}*. Silakan cek rincian yang telah kami salin. Terima kasih!`;
-            
-            let waUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, '_blank');
-        }
-
-        // RIWAYAT PENAWARAN TERPIN
+        // --- ARSIP HISTORI PENAWARAN ---
         function saveHistory() {
             const draft = getActiveDraft();
             if (!draft.cart || draft.cart.length === 0) {
-                showToast("Keranjang kosong!");
+                alert("Tidak ada item penawaran untuk diarsip.");
                 return;
             }
-
-            let subtotal = 0;
-            draft.cart.forEach(i => subtotal += (i.subtotal || i.price * i.rawQty));
-            const grandTotal = Math.max(0, subtotal - (draft.discount || 0));
 
             const record = {
                 id: 'hist_' + Date.now(),
                 custName: draft.custName || 'Pelanggan',
                 custPhone: draft.custPhone || '',
-                date: new Date().toLocaleString('id-ID'),
-                cart: JSON.parse(JSON.stringify(draft.cart)),
-                discount: draft.discount,
-                dp: draft.dp,
-                grandTotal: grandTotal
+                date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+                items: JSON.parse(JSON.stringify(draft.cart)),
+                discount: draft.discount || 0,
+                dp: draft.dp || 0
             };
 
             historyQuotes.unshift(record);
-            if (historyQuotes.length > 15) historyQuotes.pop();
-
+            if (historyQuotes.length > 20) historyQuotes.pop();
             localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
             renderHistory();
-            showToast("Arsip Penawaran disimpan!");
+            showToast("Penawaran diarsip!");
         }
 
         function renderHistory() {
-            const container = document.getElementById('historyList');
-            if (!container) return;
+            const listEl = document.getElementById('historyList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
 
-            container.innerHTML = '';
             if (historyQuotes.length === 0) {
-                container.innerHTML = `<span class="text-slate-400 italic">Belum ada arsip tersimpan.</span>`;
+                listEl.innerHTML = `<span class="text-slate-400 italic">Belum ada arsip penawaran.</span>`;
                 return;
             }
 
             historyQuotes.forEach((h, idx) => {
-                container.innerHTML += `
-                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
+                const subtotal = h.items.reduce((sum, item) => sum + item.subtotal, 0);
+                const grand = Math.max(0, subtotal - h.discount);
+                listEl.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-2 rounded-lg">
                         <div>
-                            <strong class="text-slate-800 block">${h.custName} (${h.cart.length} Material)</strong>
-                            <span class="text-[10px] text-slate-500">${h.date} &bull; <strong class="text-emerald-700">Rp ${h.grandTotal.toLocaleString('id-ID')}</strong></span>
+                            <strong>${h.custName}</strong> (${h.date}) — <span class="text-emerald-700 font-bold">Rp ${grand.toLocaleString('id-ID')}</span>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="loadHistoryToCart(${idx})" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] px-2 py-1 rounded shadow-sm">
-                                Buka
-                            </button>
-                            <button onclick="deleteHistory(${idx})" class="text-red-500 hover:text-red-700 font-bold px-1.5 py-1">
-                                &times;
-                            </button>
+                            <button onclick="loadHistory(${idx})" class="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[10px]">Buka</button>
+                            <button onclick="deleteHistory(${idx})" class="bg-red-500 text-white font-bold px-2 py-0.5 rounded text-[10px]">&times;</button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        function loadHistoryToCart(idx) {
-            const item = historyQuotes[idx];
-            if (!item) return;
-
-            createNewDraft(item.custName);
-            const draft = getActiveDraft();
-            draft.custPhone = item.custPhone;
-            draft.cart = JSON.parse(JSON.stringify(item.cart));
-            draft.discount = item.discount || 0;
-            draft.dp = item.dp || 0;
-
+        function loadHistory(idx) {
+            const h = historyQuotes[idx];
+            if (!h) return;
+            const draft = createNewDraft(h.custName);
+            draft.custPhone = h.custPhone;
+            draft.cart = JSON.parse(JSON.stringify(h.items));
+            draft.discount = h.discount;
+            draft.dp = h.dp;
             saveDrafts();
-            renderDraftSelector();
             syncActiveDraftToUI();
-            showToast(`Arsip "${item.custName}" dibuka di Draf Baru!`);
+            showToast(`Arsip "${h.custName}" dimuat ke draf baru!`);
         }
 
         function deleteHistory(idx) {
-            historyQuotes.splice(idx, 1);
-            localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
-            renderHistory();
-            showToast("Arsip dihapus.");
+            if (confirm("Hapus riwayat arsip penawaran ini?")) {
+                historyQuotes.splice(idx, 1);
+                localStorage.setItem('tb_history', JSON.stringify(historyQuotes));
+                renderHistory();
+            }
+        }
+
+        // --- SALIN & BERBAGI INVOICE ---
+        function generateInvoiceText() {
+            const draft = getActiveDraft();
+            const cart = draft.cart || [];
+            if (cart.length === 0) return "";
+
+            let txt = `*${storeProfile.name}*\n`;
+            txt += `${storeProfile.desc}\n`;
+            txt += `-----------------------------------\n`;
+            txt += `*INVOICE PENAWARAN MATERIAL*\n`;
+            txt += `Pelanggan: ${draft.custName || '-'}\n`;
+            txt += `No. WA: ${draft.custPhone || '-'}\n`;
+            txt += `-----------------------------------\n\n`;
+
+            let subtotal = 0;
+            cart.forEach((item, i) => {
+                subtotal += item.subtotal;
+                txt += `${i+1}. *${item.name}*\n   Qty: ${item.qty} @ Rp ${item.price.toLocaleString('id-ID')}\n   Subtotal: Rp ${item.subtotal.toLocaleString('id-ID')}\n`;
+            });
+
+            const grand = Math.max(0, subtotal - (draft.discount || 0));
+            const sisa = Math.max(0, grand - (draft.dp || 0));
+
+            txt += `\n-----------------------------------`;
+            txt += `\nSubtotal: Rp ${subtotal.toLocaleString('id-ID')}`;
+            if (draft.discount > 0) txt += `\nDiskon Toko: -Rp ${draft.discount.toLocaleString('id-ID')}`;
+            txt += `\n*GRAND TOTAL: Rp ${grand.toLocaleString('id-ID')}*`;
+            if (draft.dp > 0) txt += `\nUang Muka (DP): Rp ${draft.dp.toLocaleString('id-ID')}`;
+            txt += `\n*SISA PELUNASAN: Rp ${sisa.toLocaleString('id-ID')}*`;
+            txt += `\n-----------------------------------\n`;
+            if (storeProfile.bankAccount) {
+                txt += `\nPembayaran via Transfer:\nBank ${storeProfile.bankName} - ${storeProfile.bankAccount} A/N ${storeProfile.bankHolder}\n`;
+            }
+            txt += `\nTerima kasih telah mempercayakan kebutuhan bangunan Anda kepada kami!`;
+
+            return txt;
+        }
+
+        function copyInvoiceText() {
+            const txt = generateInvoiceText();
+            if (!txt) { alert("Daftar penawaran kosong."); return; }
+            navigator.clipboard.writeText(txt).then(() => showToast("Invoice disalin ke clipboard!"));
+        }
+
+        function shareWhatsApp() {
+            const txt = generateInvoiceText();
+            if (!txt) { alert("Daftar penawaran kosong."); return; }
+            const draft = getActiveDraft();
+            let phone = (draft.custPhone || '').replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+            
+            const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(txt)}` : `https://wa.me/?text=${encodeURIComponent(txt)}`;
+            window.open(url, '_blank');
         }
     </script>
 </body>
