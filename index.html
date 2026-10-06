@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Material Toko Bangunan Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- NAVBAR TOP BAR -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500 p-2 rounded-lg text-slate-950 font-extrabold text-xl">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight" id="headerStoreName">TB MAJU JAYA MAKMUR</h1>
+                    <p class="text-[11px] text-slate-400">Kalkulator Material & Estimasi Biaya Bangunan</p>
+                </div>
+            </div>
+
+            <!-- LOGIN & SALDO STATUS -->
+            <div class="flex items-center space-x-3">
+                <div id="loggedOutView" class="block">
+                    <button onclick="openLoginModal()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login WA / Google
+                    </button>
+                </div>
+
+                <div id="loggedInView" class="hidden flex items-center space-x-3">
+                    <div class="text-right hidden sm:block">
+                        <p id="userNameText" class="text-xs font-bold text-slate-200">Pelanggan</p>
+                        <p id="userPhoneText" class="text-[10px] text-slate-400">08123456789</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 px-3 py-1 rounded-lg flex items-center space-x-2">
+                        <i class="fa-solid fa-wallet text-amber-400 text-xs"></i>
+                        <span id="userSaldoText" class="font-extrabold text-amber-300 text-xs">Rp 0</span>
+                    </div>
+                    <button onclick="openTopUpModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold px-2.5 py-1 rounded transition">
+                        + Top Up
+                    </button>
+                    <button onclick="logoutUser()" title="Keluar" class="text-slate-400 hover:text-red-400 text-xs px-1">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER SALDO KURANG WARNING -->
+    <div id="expiredBanner" class="hidden bg-amber-500 text-slate-950 px-4 py-2 text-xs text-center font-bold">
+        <i class="fa-solid fa-triangle-exclamation mr-1"></i> Saldo Anda Kurang dari Rp 1.000. Silakan Top Up untuk melanjutkan perhitungan material!
+        <button onclick="openTopUpModal()" class="ml-2 bg-slate-900 text-white px-2 py-0.5 rounded text-[11px]">Top Up Sekarang</button>
+    </div>
+
+    <!-- UTAMA CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- KOLOM KIRI: FORM ESTIMASI MATERIAL -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- PEMILIHAN TAB CALCULATOR -->
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-1">
+                <button onclick="switchTab('din')" id="tab-din" class="tab-btn bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center transition">
+                    <i class="fa-solid fa-border-all mr-1"></i> Dinding
+                </button>
+                <button onclick="switchTab('ker')" id="tab-ker" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-rug mr-1"></i> Keramik
+                </button>
+                <button onclick="switchTab('plf')" id="tab-plf" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-vector-square mr-1"></i> Plafon
+                </button>
+                <button onclick="switchTab('bes')" id="tab-bes" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-bars-staggered mr-1"></i> Pembesian
+                </button>
+                <button onclick="switchTab('atp')" id="tab-atp" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-house-chimney mr-1"></i> Atap
+                </button>
+                <button onclick="switchTab('btn')" id="tab-btn" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-cubes mr-1"></i> Cor Dak
+                </button>
+                <button onclick="switchTab('pon')" id="tab-pon" class="tab-btn bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-lg flex-1 min-w-[100px] text-center hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-layer-group mr-1"></i> Pondasi
+                </button>
+            </div>
+
+            <!-- PANEL FORM INPUT CALCULATOR -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                
+                <!-- CONTENT TAB: DINDING -->
+                <div id="content-din" class="tab-content space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2 flex items-center justify-between">
+                        <span><i class="fa-solid fa-border-all text-emerald-600 mr-2"></i>Hitung Material Dinding</span>
+                        <span class="text-[11px] font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Biaya: Rp 1.000 / hitung</span>
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Panjang Dinding (m)</label>
+                            <input type="number" id="dinPanjang" value="10" step="0.1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold focus:bg-white focus:border-emerald-600 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Tinggi Dinding (m)</label>
+                            <input type="number" id="dinTinggi" value="3" step="0.1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold focus:bg-white focus:border-emerald-600 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Jenis Bata / Material</label>
+                            <select id="dinJenis" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold focus:bg-white focus:border-emerald-600 focus:outline-none">
+                                <option value="hebel75">Bata Ringan / Hebel 7.5 cm</option>
+                                <option value="hebel100">Bata Ringan / Hebel 10 cm</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="triggerHitung('din')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calculator"></i> Hitung Material Dinding (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <!-- CONTENT TAB LAINNYA (DUMMY SKELETON REPLACEMENT) -->
+                <div id="content-ker" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Material Keramik & Granit</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Panjang Ruangan (m)</label>
+                            <input type="number" id="kerPanjang" value="5" class="w-full border rounded p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Lebar Ruangan (m)</label>
+                            <input type="number" id="kerLebar" value="4" class="w-full border rounded p-2 text-xs">
+                        </div>
+                    </div>
+                    <button onclick="triggerHitung('ker')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Material Keramik (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <div id="content-plf" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Material Plafon Gypsum/GRC</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Panjang Ruangan (m)</label>
+                            <input type="number" id="plfPanjang" value="6" class="w-full border rounded p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-600 block mb-1">Lebar Ruangan (m)</label>
+                            <input type="number" id="plfLebar" value="4" class="w-full border rounded p-2 text-xs">
+                        </div>
+                    </div>
+                    <button onclick="triggerHitung('plf')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Material Plafon (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <div id="content-bes" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Pembesian Kolom / Sloof</h2>
+                    <p class="text-xs text-slate-500">Kalkulasi jumlah batang besi beton & kawat bendrat.</p>
+                    <button onclick="triggerHitung('bes')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Pembesian (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <div id="content-atp" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Rangka & Genteng Atap</h2>
+                    <button onclick="triggerHitung('atp')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Atap (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <div id="content-btn" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Material Cor Dak Beton</h2>
+                    <button onclick="triggerHitung('btn')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Cor Dak (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+                <div id="content-pon" class="tab-content hidden space-y-4">
+                    <h2 class="font-bold text-sm text-slate-800 border-b pb-2">Hitung Material Pondasi Batu Kali</h2>
+                    <button onclick="triggerHitung('pon')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-lg shadow transition">
+                        <i class="fa-solid fa-calculator"></i> Hitung Pondasi (Potong Saldo Rp 1.000)
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- KOLOM KANAN: KERANJANG PENAWARAN & INVOICE -->
+        <div class="space-y-6">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-cart-flatbed text-amber-500 mr-2"></i>Daftar Belanja Material</h3>
+                    <button onclick="clearCart()" class="text-[11px] text-red-500 hover:underline">Kosongkan</button>
+                </div>
+
+                <div class="space-y-2">
+                    <input type="text" id="topCustName" placeholder="Nama Pelanggan/Proyek" class="w-full bg-slate-50 border rounded px-2.5 py-1.5 text-xs font-bold">
+                    <input type="text" id="topCustPhone" placeholder="No. WA (0812...)" class="w-full bg-slate-50 border rounded px-2.5 py-1.5 text-xs font-bold">
+                </div>
+
+                <div id="cartItemsContainer" class="divide-y max-h-60 overflow-y-auto text-xs">
+                    <p class="text-center text-slate-400 py-6 italic">Belum ada item material yang ditambahkan.</p>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg space-y-1.5 border border-slate-200">
+                    <div class="flex justify-between text-xs font-bold text-slate-900">
+                        <span>Total Biaya:</span>
+                        <span id="cartGrandTotalText" class="text-emerald-600">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="shareWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition flex items-center justify-center gap-1.5">
+                        <i class="fa-brands fa-whatsapp"></i> Kirim WA
+                    </button>
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 rounded-lg transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Cetak Invoice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL POPUP: LOGIN NO WA -->
+    <div id="modalLogin" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 text-center shadow-xl">
+            <div class="bg-emerald-100 text-emerald-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <h3 class="font-bold text-lg text-slate-900">Masuk Akun Pelanggan</h3>
+            <p class="text-xs text-slate-500">Masukkan Nomor WA Anda untuk mengecek saldo database dan memulai perhitungan material.</p>
+            <input type="text" id="inputLoginPhone" placeholder="Contoh: 08123456789" class="w-full border border-slate-300 rounded-lg p-2.5 text-center font-bold text-sm focus:border-emerald-600 focus:outline-none">
+            <button onclick="submitLoginWA()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow">
+                Masuk / Cek Saldo
+            </button>
+            <button onclick="closeModal('modalLogin')" class="text-xs text-slate-400 hover:underline block mx-auto">Batal</button>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP: TOP UP SALDO -->
+    <div id="modalTopUp" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-coins text-amber-500 mr-2"></i>Top Up Saldo Kalkulator</h3>
+                <button onclick="closeModal('modalTopUp')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-500">Setiap 1x perhitungan material memotong saldo Rp 1.000 langsung dari akun database Anda.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button onclick="processCreditPayment(5000)" class="border-2 border-emerald-500 hover:bg-emerald-50 p-3 rounded-xl text-center space-y-1">
+                    <p class="text-xs font-bold text-slate-900">Rp 5.000</p>
+                    <p class="text-[10px] text-emerald-600 font-extrabold">5x Hitung</p>
+                </button>
+                <button onclick="processCreditPayment(20000)" class="border-2 border-emerald-500 hover:bg-emerald-50 p-3 rounded-xl text-center space-y-1">
+                    <p class="text-xs font-bold text-slate-900">Rp 20.000</p>
+                    <p class="text-[10px] text-emerald-600 font-extrabold">20x Hitung</p>
+                </button>
+                <button onclick="processCreditPayment(50000)" class="border-2 border-emerald-500 hover:bg-emerald-50 p-3 rounded-xl text-center space-y-1">
+                    <p class="text-xs font-bold text-slate-900">Rp 50.000</p>
+                    <p class="text-[10px] text-emerald-600 font-extrabold">50x Hitung</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFIKASI -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-info text-emerald-400"></i>
+        <span id="toastMsg">Notifikasi</span>
+    </div>
+
+    <!-- JAVASCRIPT KONEKSI APP SCRIPT & UI LOGIC -->
+    <script>
+        // MASUKKAN URL DEPLOYMENT GOOGLE APPS SCRIPT ANDA
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzZoB-xQlHqvkNdJqbWiqYhfeJU7aCGewfGt1lPU4ty_WFuGYH-sc-coAllqsFNvs6I7w/exec";
+
+        let currentUser = {
+            isLoggedIn: false,
+            noWA: '',
+            name: '',
+            saldo: 0
+        };
+
+        let cart = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initServerUserSession();
+        });
+
+        // 1. DIBUKA SAAT APLIKASI DI-LOAD
+        function initServerUserSession() {
+            const savedSession = localStorage.getItem('tb_user_wa_session');
+            if (savedSession) {
+                currentUser = JSON.parse(savedSession);
+                if (currentUser.noWA) {
+                    fetchSaldoFromGas(currentUser.noWA);
+                }
+            }
+            renderUserSessionUI();
+        }
+
+        // 2. CEK & FETCH SALDO DARI APPS SCRIPT (doGet)
+        async function fetchSaldoFromGas(noWA) {
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?noWA=${encodeURIComponent(noWA)}`);
+                const data = await res.json();
+                if (data.success) {
+                    currentUser.isLoggedIn = true;
+                    currentUser.noWA = data.noWA;
+                    currentUser.name = data.nama;
+                    currentUser.saldo = data.saldo;
+                    saveLocalUserSession();
+                }
+            } catch (err) {
+                console.error("Gagal terhubung ke Google Sheets:", err);
+            }
+        }
+
+        // 3. LOGIN VIA NO WA
+        async function submitLoginWA() {
+            const phoneInput = document.getElementById('inputLoginPhone').value.trim();
+            if (!phoneInput) {
+                showToast("Nomor WA tidak boleh kosong");
+                return;
+            }
+
+            showToast("Verifikasi akun di Google Sheets...");
+            await fetchSaldoFromGas(phoneInput);
+
+            if (currentUser.isLoggedIn) {
+                closeModal('modalLogin');
+                showToast(`Login Berhasil! Saldo: Rp ${currentUser.saldo.toLocaleString('id-ID')}`);
+            } else {
+                showToast("Gagal mengambil data dari server.");
+            }
+        }
+
+        // 4. EKSEKUSI HITUNG & POTONG SALDO REAL-TIME (doPost)
+        async function triggerHitung(tabType) {
+            if (!currentUser.isLoggedIn) {
+                openModal('modalLogin');
+                return;
+            }
+
+            if (currentUser.saldo < 1000) {
+                openModal('modalTopUp');
+                showToast("Saldo Anda kurang. Silakan Top Up terlebih dahulu!");
+                return;
+            }
+
+            showToast("Memotong saldo Rp 1.000 ke server...");
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'potong',
+                        noWA: currentUser.noWA,
+                        namaProyek: document.getElementById('topCustName').value || 'Proyek Utama',
+                        potongan: 1000
+                    })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    currentUser.saldo = resData.sisaSaldo;
+                    saveLocalUserSession();
+
+                    // EKSEKUSI KALKULASI BERDASARKAN TAB
+                    if (tabType === 'din') executeCalcDinding();
+                    showToast("Perhitungan berhasil!");
+                } else {
+                    showToast(resData.message || "Saldo tidak mencukupi");
+                    fetchSaldoFromGas(currentUser.noWA);
+                }
+            } catch (err) {
+                showToast("Terjadi kesalahan koneksi backend GAS.");
+            }
+        }
+
+        // 5. PROCESS TOP UP SALDO REAL-TIME (doPost)
+        async function processCreditPayment(amount) {
+            if (!currentUser.isLoggedIn) {
+                openModal('modalLogin');
+                return;
+            }
+
+            showToast(`Memproses Top Up Rp ${amount.toLocaleString('id-ID')}...`);
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'topup',
+                        noWA: currentUser.noWA,
+                        namaProyek: 'Top Up Saldo System',
+                        nominal: amount
+                    })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    currentUser.saldo = resData.sisaSaldo;
+                    saveLocalUserSession();
+                    closeModal('modalTopUp');
+                    showToast(`Top Up Berhasil! Saldo Baru: Rp ${currentUser.saldo.toLocaleString('id-ID')}`);
+                }
+            } catch (err) {
+                showToast("Gagal memproses Top Up ke server.");
+            }
+        }
+
+        // KALKULASI CONTOH DINDING
+        function executeCalcDinding() {
+            const p = parseFloat(document.getElementById('dinPanjang').value) || 0;
+            const t = parseFloat(document.getElementById('dinTinggi').value) || 0;
+            const jenis = document.getElementById('dinJenis').value;
+            const luas = p * t;
+
+            let jmlHebel = Math.ceil(luas * 8.33); // Estimasi 8.33 pcs/m2
+            let volM3 = (luas * 0.075).toFixed(2);
+
+            cart.push({
+                nama: `Bata Ringan Hebel (${jenis})`,
+                qty: volM3,
+                satuan: 'm³',
+                total: volM3 * 650000
+            });
+
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItemsContainer');
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-6 italic">Belum ada item material yang ditambahkan.</p>`;
+                document.getElementById('cartGrandTotalText').innerText = `Rp 0`;
+                return;
+            }
+
+            let html = '';
+            let grandTotal = 0;
+
+            cart.forEach((item, index) => {
+                grandTotal += item.total;
+                html += `
+                    <div class="py-2 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-slate-800">${item.nama}</p>
+                            <p class="text-[10px] text-slate-500">${item.qty} ${item.satuan}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-emerald-600">Rp ${item.total.toLocaleString('id-ID')}</p>
+                            <button onclick="removeItem(${index})" class="text-[10px] text-red-500 hover:underline">Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('cartGrandTotalText').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+        }
+
+        function removeItem(idx) {
+            cart.splice(idx, 1);
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = [];
+            renderCart();
+        }
+
+        function renderUserSessionUI() {
+            const loggedOutView = document.getElementById('loggedOutView');
+            const loggedInView = document.getElementById('loggedInView');
+            const userNameText = document.getElementById('userNameText');
+            const userPhoneText = document.getElementById('userPhoneText');
+            const userSaldoText = document.getElementById('userSaldoText');
+            const expiredBanner = document.getElementById('expiredBanner');
+
+            if (currentUser.isLoggedIn) {
+                loggedOutView.classList.add('hidden');
+                loggedInView.classList.remove('hidden');
+                userNameText.innerText = currentUser.name;
+                userPhoneText.innerText = currentUser.noWA;
+                userSaldoText.innerText = `Saldo: Rp ${currentUser.saldo.toLocaleString('id-ID')}`;
+
+                if (currentUser.saldo < 1000) {
+                    expiredBanner.classList.remove('hidden');
+                } else {
+                    expiredBanner.classList.add('hidden');
+                }
+            } else {
+                loggedOutView.classList.remove('hidden');
+                loggedInView.classList.add('hidden');
+                expiredBanner.classList.add('hidden');
+            }
+        }
+
+        function logoutUser() {
+            currentUser = { isLoggedIn: false, noWA: '', name: '', saldo: 0 };
+            localStorage.removeItem('tb_user_wa_session');
+            renderUserSessionUI();
+            showToast("Anda telah keluar.");
+        }
+
+        function saveLocalUserSession() {
+            localStorage.setItem('tb_user_wa_session', JSON.stringify(currentUser));
+            renderUserSessionUI();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            const activeContent = document.getElementById(`content-${tabId}`);
+
+            if (activeBtn && activeContent) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                activeBtn.classList.add('bg-emerald-600', 'text-white');
+                activeContent.classList.remove('hidden');
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function shareWhatsApp() {
+            const name = document.getElementById('topCustName').value || 'Pelanggan';
+            let text = `Halo ${name}, berikut rincian penawaran material bangunan Anda:\n\n`;
+            cart.forEach(item => {
+                text += `• ${item.nama} (${item.qty} ${item.satuan}) : Rp ${item.total.toLocaleString('id-ID')}\n`;
+            });
+            text += `\n*Total Keseluruhan:* ${document.getElementById('cartGrandTotalText').innerText}\n\nTerima Kasih!`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
