@@ -1120,14 +1120,14 @@ async function processCreditPayment(amount) {
     showToast(`Menyiapkan gerbang pembayaran Midtrans Rp ${amount.toLocaleString('id-ID')}...`);
 
     try {
-        // 1. Minta Snap Token resmi dari file backend PHP di server edueasy.id
-        const response = await fetch('https://edueasy.id/get-snap-token.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: currentUser ? currentUser.userId : 'GUEST',
-                email: currentUser ? currentUser.email : 'user@edueasy.id',
-                grossAmount: amount
+        // 1. Minta Snap Token resmi dari REST API WordPress edueasy.id
+                const response = await fetch('https://edueasy.id/wp-json/kalkulator/v1/create-snap-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                amount: amount,
+                custName: currentUser ? (currentUser.userId || 'Pelanggan') : 'Pelanggan Kalkulator',
+                custPhone: '08120000000'
             })
         });
 
